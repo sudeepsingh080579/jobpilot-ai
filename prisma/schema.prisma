@@ -1,0 +1,360 @@
+// JobPilot AI data model.
+// Dev provider is SQLite. For Postgres, change provider to "postgresql",
+// point DATABASE_URL at the database, and create a fresh migration.
+// The schema uses only portable Prisma types (no SQLite-only native types).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String   @id @default(cuid())
+  email                  String   @unique
+  passwordHash           String
+  name                   String
+  headline               String   @default("")
+  location               String   @default("")
+  yearsExperience        Int      @default(0)
+  currentTitle           String   @default("")
+  seniority              String   @default("")
+  targetCompensation     String   @default("")
+  timezone               String   @default("Asia/Kolkata")
+  pastedProfile          String   @default("")
+  headlineSuggestion     String   @default("")
+  aboutSuggestion        String   @default("")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  niches         Niche[]
+  jobs           Job[]
+  resumes        Resume[]
+  coverLetters   CoverLetter[]
+  companies      TargetCompany[]
+  contacts       Contact[]
+  cars           CarStatement[]
+  skills         Skill[]
+  posts          LinkedInPost[]
+  decks          PitchDeck[]
+  interviews     InterviewSession[]
+  negotiations   NegotiationSession[]
+  reminders      Reminder[]
+  messages       ChatMessage[]
+  pushSubs       PushSubscription[]
+  templates      OutreachTemplate[]
+  swot           SwotReport?
+}
+
+model Niche {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  title           String
+  aliases         String   @default("[]")
+  industries      String   @default("[]")
+  seniority       String   @default("")
+  roleCategory    String   @default("")
+  functionName    String   @default("")
+  companyTypes    String   @default("[]")
+  locations       String   @default("[]")
+  workModes       String   @default("[]")
+  targetCompanies String   @default("[]")
+  includeKeywords String   @default("[]")
+  excludeKeywords String   @default("[]")
+  why             String   @default("")
+  payBenchmark    String   @default("")
+  isPrimary       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  jobs            Job[]
+
+  @@index([userId])
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nicheId     String?
+  niche       Niche?    @relation(fields: [nicheId], references: [id], onDelete: SetNull)
+  title       String
+  company     String
+  location    String    @default("")
+  workMode    String    @default("")
+  experience  String    @default("")
+  salary      String    @default("")
+  url         String    @default("")
+  source      String    @default("manual")
+  description String    @default("")
+  status      String    @default("SAVED")
+  fitScore    Int?
+  fitBand     String    @default("")
+  fitDetail   String    @default("{}")
+  keywords    String    @default("[]")
+  notes       String    @default("")
+  archived    Boolean   @default(false)
+  appliedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  contacts    Contact[]
+  coverLetters CoverLetter[]
+  reminders   Reminder[]
+  drafts      StageDraft[]
+
+  @@index([userId, status])
+}
+
+model StageDraft {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  kind      String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([jobId, kind])
+}
+
+model TargetCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  industry  String   @default("")
+  website   String   @default("")
+  location  String   @default("")
+  notes     String   @default("")
+  status    String   @default("RESEARCHING")
+  problems  String   @default("[]")
+  createdAt DateTime @default(now())
+  contacts  Contact[]
+  decks     PitchDeck[]
+
+  @@index([userId])
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String?
+  company   TargetCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  jobId     String?
+  job       Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  name      String
+  title     String   @default("")
+  email     String   @default("")
+  linkedin  String   @default("")
+  type      String   @default("POTENTIAL_REFERRER")
+  tags      String   @default("[]")
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+  messages  OutreachMessage[]
+
+  @@index([userId])
+}
+
+model OutreachMessage {
+  id        String   @id @default(cuid())
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  step      String
+  body      String
+  status    String   @default("DRAFT")
+  updatedAt DateTime @updatedAt
+
+  @@index([contactId, step])
+}
+
+model OutreachTemplate {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  step   String
+  name   String
+  body   String
+
+  @@unique([userId, step])
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  template    String   @default("executive")
+  isPrimary   Boolean  @default(false)
+  rawText     String   @default("")
+  content     String   @default("{}")
+  score       Int?
+  scoreDetail String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  coverLetters CoverLetter[]
+
+  @@index([userId])
+}
+
+model CoverLetter {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String?
+  job       Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  resumeId  String?
+  resume    Resume?  @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  title     String
+  template  String   @default("letterhead")
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model CarStatement {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company      String
+  role         String
+  challenge    String
+  action       String
+  result       String
+  skills       String   @default("[]")
+  resumeBullet String   @default("")
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Skill {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  category String
+  level    Int    @default(3)
+  variants String @default("[]")
+  source   String @default("profile")
+
+  @@index([userId])
+}
+
+model SwotReport {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  strengths     String   @default("[]")
+  weaknesses    String   @default("[]")
+  opportunities String   @default("[]")
+  threats       String   @default("[]")
+  actions       String   @default("[]")
+  updatedAt     DateTime @updatedAt
+}
+
+model LinkedInPost {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme     String
+  content   String
+  weekOf    String
+  status    String   @default("DRAFT")
+  createdAt DateTime @default(now())
+
+  @@index([userId, weekOf])
+}
+
+model PitchDeck {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String?
+  company     TargetCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  companyName String
+  problem     String
+  slides      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model InterviewSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String?
+  title     String
+  mode      String   @default("behavioral")
+  questions String   @default("[]")
+  report    String   @default("{}")
+  status    String   @default("IN_PROGRESS")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model NegotiationSession {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId      String?
+  title      String
+  target     String   @default("")
+  floor      String   @default("")
+  offer      String   @default("")
+  difficulty String   @default("medium")
+  script     String   @default("")
+  transcript String   @default("[]")
+  report     String   @default("{}")
+  status     String   @default("SETUP")
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Reminder {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId      String?
+  job        Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  title      String
+  body       String    @default("")
+  dueAt      DateTime
+  done       Boolean   @default(false)
+  notifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, dueAt])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String
+  content   String
+  module    String   @default("assistant")
+  jobId     String?
+  rating    Int?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
