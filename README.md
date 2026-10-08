@@ -53,7 +53,9 @@ Generate fresh push keys with `npx web-push generate-vapid-keys` before any shar
 
 ## What the desk includes
 
-- **Assistant** routes a request and suggests the next step. On a saved role: cover letter, fit, ATS check, tailor, practice interview.
+- **Home** is a six-step journey: resume, niche, job match, referral note, pitch, then negotiation. One card shows the next step.
+- **Assistant** is a floating chat. It routes a request and suggests the next step. On a saved role: cover letter, fit, ATS check, tailor, practice interview.
+- **More tools** holds strategy, SWOT, companies, analytics, templates, presence, and the rest.
 - **Strategy** for one or more niches, suggestions, fit scores, a skill map, SWOT, and Challenge-Action-Result notes that can become a master resume.
 - **Resumes** from PDF, DOCX, or pasted text. Three templates (Executive, Atlas, Ledger), a rule-based score, ATS keyword match, per-job tailoring, and print-to-PDF.
 - **Cover letters** from a role plus a resume, then edit and print.

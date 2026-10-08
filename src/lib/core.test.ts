@@ -14,6 +14,7 @@ import { scoreFit } from "@/lib/scoring/fit";
 import { analyzeAnswer } from "@/lib/scoring/interview";
 import { scoreNegotiation } from "@/lib/scoring/negotiation";
 import { scoreResume } from "@/lib/scoring/resume-score";
+import { journeyState } from "@/lib/journey";
 import { buildWeeklyPlan } from "@/lib/scoring/weekly";
 import type { ResumeContent } from "@/lib/resume/types";
 
@@ -240,6 +241,42 @@ describe("plans, routing, interviews, outreach", () => {
     expect(parsed.email).toBe("sudeep@example.com");
     expect(parsed.skills[0]?.items).toContain("Kubernetes");
     expect(parsed.experience.length).toBeGreaterThan(0);
+  });
+
+  it("opens the first unfinished journey step and does not skip ahead", () => {
+    const early = journeyState({
+      resumeReady: false,
+      nicheReady: false,
+      tailored: false,
+      referralReady: false,
+      pitchReady: false,
+      negotiateReady: false,
+    });
+    expect(early.next?.id).toBe("resume");
+    expect(early.completed).toBe(0);
+
+    const mid = journeyState({
+      resumeReady: true,
+      nicheReady: true,
+      tailored: false,
+      referralReady: true,
+      pitchReady: true,
+      negotiateReady: false,
+    });
+    expect(mid.next?.id).toBe("match");
+    expect(mid.steps.filter((step) => step.status === "done").map((step) => step.id)).toEqual(["resume", "niche"]);
+    expect(mid.steps.find((step) => step.id === "referral")?.status).toBe("upcoming");
+
+    const done = journeyState({
+      resumeReady: true,
+      nicheReady: true,
+      tailored: true,
+      referralReady: true,
+      pitchReady: true,
+      negotiateReady: true,
+    });
+    expect(done.next).toBeNull();
+    expect(done.completed).toBe(6);
   });
 
   it("keeps a deep question bank", () => {

@@ -1,18 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader, Outfit } from "next/font/google";
+import { Outfit } from "next/font/google";
 import { brand } from "@/lib/brand";
 import { RegisterSw } from "@/components/pwa";
 import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
-const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-newsreader" });
 
 export const metadata: Metadata = {
   title: { default: brand.name, template: `%s · ${brand.shortName}` },
   description: brand.description,
   applicationName: brand.name,
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: brand.shortName, statusBarStyle: "black-translucent" },
+  appleWebApp: { capable: true, title: brand.shortName, statusBarStyle: "default" },
   icons: {
     icon: [
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -23,14 +22,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#122e2a",
+  themeColor: "#4f46e5",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${newsreader.variable} h-full`}>
+    <html lang="en" className={`${outfit.variable} h-full`}>
       <body className="min-h-full antialiased">
         <RegisterSw />
         {children}

@@ -13,7 +13,7 @@ export function ResumeIntake() {
   const [pending, setPending] = useState(false);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="space-y-3">
       <form
         className="desk-card p-4"
         onSubmit={async (event) => {

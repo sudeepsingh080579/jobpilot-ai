@@ -23,7 +23,7 @@ export function JobDetail({
   const kinds = draftsForStage(status);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
+    <div className="mx-auto max-w-xl space-y-4">
       <div className="space-y-4">
         <section className="desk-card p-4">
           <div className="flex flex-wrap items-center gap-2">

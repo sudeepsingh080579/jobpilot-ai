@@ -50,7 +50,7 @@ export function SearchPanel({ providers }: { providers: { id: string; name: stri
 
   return (
     <div className="space-y-4">
-      <form onSubmit={search} className="desk-card grid gap-3 p-4 md:grid-cols-3">
+      <form onSubmit={search} className="desk-card space-y-3 p-4">
         <label className="text-sm">Title<input className="field mt-1" value={title} onChange={(event) => setTitle(event.target.value)} /></label>
         <label className="text-sm">Location<input className="field mt-1" value={location} onChange={(event) => setLocation(event.target.value)} /></label>
         <label className="text-sm">
@@ -62,10 +62,8 @@ export function SearchPanel({ providers }: { providers: { id: string; name: stri
           </select>
         </label>
         <label className="text-sm">Minimum years<input className="field mt-1" value={experience} onChange={(event) => setExperience(event.target.value)} inputMode="numeric" /></label>
-        <label className="text-sm md:col-span-2">Keywords<input className="field mt-1" value={keywords} onChange={(event) => setKeywords(event.target.value)} placeholder="kubernetes, finops" /></label>
-        <div className="md:col-span-3">
-          <Button type="submit" disabled={pending}>Search</Button>
-        </div>
+        <label className="text-sm">Keywords<input className="field mt-1" value={keywords} onChange={(event) => setKeywords(event.target.value)} placeholder="kubernetes, finops" /></label>
+        <Button className="w-full" type="submit" disabled={pending}>Search</Button>
       </form>
       <ul className="flex flex-wrap gap-2 text-xs">
         {providers.map((provider) => (
@@ -96,7 +94,7 @@ export function SearchPanel({ providers }: { providers: { id: string; name: stri
       >
         <h2 className="font-serif text-2xl">Add one role by hand</h2>
         <p className="text-sm text-muted">Paste a description or a single URL you already have. This is not a crawler.</p>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-3">
           <input className="field" placeholder="Title" value={manual.title} onChange={(event) => setManual({ ...manual, title: event.target.value })} required />
           <input className="field" placeholder="Company" value={manual.company} onChange={(event) => setManual({ ...manual, company: event.target.value })} required />
           <input className="field" placeholder="Location" value={manual.location} onChange={(event) => setManual({ ...manual, location: event.target.value })} />

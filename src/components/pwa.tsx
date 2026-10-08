@@ -42,7 +42,7 @@ export function DueReminders() {
     };
   }, []);
   return (
-    <div className="mb-4 hidden rounded-xl border border-copper/30 bg-[#f8ebe4] px-4 py-3 text-sm">
+    <div className="mb-4 hidden rounded-3xl border border-coral/30 bg-coral-soft px-4 py-3 text-sm">
       <p className="font-medium text-copper">Due now</p>
       <p id="due-banner" className="text-ink" />
       <a className="mt-1 inline-block text-pine underline" href="/reminders">

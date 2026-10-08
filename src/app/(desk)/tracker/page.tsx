@@ -10,14 +10,12 @@ export default async function TrackerPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Pipeline"
-        title="Tracker"
-        lede="Saved through rejected. Drag a card or use the table. Notes and drafts live on the role."
+        title="Your jobs"
+        lede="Drag a card, or use the menu on it. Notes live on the role."
         actions={
-          <>
-            <Link className="rounded-lg border border-line bg-paper px-3 py-2 text-sm" href="/analytics">Funnel</Link>
-            <Link className="rounded-lg bg-pine px-3 py-2 text-sm text-cream" href="/search">Add a role</Link>
-          </>
+          <Link className="inline-flex h-12 items-center rounded-full bg-indigo px-5 font-bold text-white" href="/search">
+            Add a role
+          </Link>
         }
       />
       <TrackerBoard

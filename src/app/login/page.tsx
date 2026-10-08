@@ -23,8 +23,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <input className="field mt-1" name="password" type="password" autoComplete="current-password" required defaultValue={brand.demoPassword} data-testid="login-password" />
         </label>
         {query.error ? <p className="text-sm text-bad">Those credentials did not match. Try the demo pair below.</p> : null}
-        <button className="h-11 w-full rounded-lg bg-pine text-sm text-cream" type="submit" data-testid="login-submit">
-          Enter the desk
+        <button className="h-14 w-full rounded-full bg-indigo text-base font-bold text-white" type="submit" data-testid="login-submit">
+          Sign in
         </button>
       </form>
       <p className="mt-4 rounded-lg bg-mist px-3 py-2 text-sm text-pine">

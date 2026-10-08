@@ -19,8 +19,23 @@ export type TrackerCard = {
 
 export function TrackerBoard({ jobs }: { jobs: TrackerCard[] }) {
   const { error, pending, run } = useRun();
-  const [table, setTable] = useState(false);
   const [hideRejected, setHideRejected] = useState(false);
+  const tones: Record<string, string> = {
+    SAVED: "bg-sun-soft",
+    APPLIED: "bg-teal-soft",
+    SCREENING: "bg-mist",
+    INTERVIEWING: "bg-violet/15",
+    OFFER: "bg-coral-soft",
+    REJECTED: "bg-canvas",
+  };
+  const dots: Record<string, string> = {
+    SAVED: "bg-sun",
+    APPLIED: "bg-teal",
+    SCREENING: "bg-indigo",
+    INTERVIEWING: "bg-violet",
+    OFFER: "bg-coral",
+    REJECTED: "bg-muted",
+  };
   const visible = useMemo(() => jobs.filter((job) => (hideRejected ? job.status !== "REJECTED" : true)), [jobs, hideRejected]);
 
   function move(id: string, status: string) {
@@ -29,11 +44,8 @@ export function TrackerBoard({ jobs }: { jobs: TrackerCard[] }) {
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <button className="rounded-lg border border-line bg-paper px-3 py-1.5 text-sm" type="button" onClick={() => setTable((value) => !value)}>
-          {table ? "Board" : "Table"}
-        </button>
-        <label className="flex items-center gap-2 text-sm text-muted">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-sm font-medium text-muted">
           <input type="checkbox" checked={hideRejected} onChange={(event) => setHideRejected(event.target.checked)} />
           Hide rejected
         </label>
@@ -41,41 +53,12 @@ export function TrackerBoard({ jobs }: { jobs: TrackerCard[] }) {
         {error ? <span className="text-sm text-bad">{error}</span> : null}
       </div>
       {jobs.length === 0 ? (
-        <div className="desk-card p-6 text-sm text-muted">
-          The board is empty. <Link className="text-pine" href="/search">Search the sample market</Link> or paste a role you already have.
-        </div>
-      ) : null}
-      {table ? (
-        <div className="desk-card overflow-x-auto">
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="text-muted">
-              <tr>
-                <th className="px-3 py-2 font-medium">Role</th>
-                <th className="px-3 py-2 font-medium">Fit</th>
-                <th className="px-3 py-2 font-medium">Stage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((job) => (
-                <tr key={job.id} className="border-t border-line">
-                  <td className="px-3 py-2">
-                    <Link href={`/tracker/${job.id}`} className="font-medium">
-                      {job.title}
-                    </Link>
-                    <p className="text-muted">{job.company}</p>
-                  </td>
-                  <td className="px-3 py-2">{job.fitScore ?? "–"} {job.fitBand}</td>
-                  <td className="px-3 py-2">
-                    <select className="field" value={job.status} aria-label={`Stage for ${job.title}`} onChange={(event) => move(job.id, event.target.value)}>
-                      {JOB_STAGES.map((stage) => (
-                        <option key={stage.id} value={stage.id}>{stage.label}</option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="desk-card px-6 py-12 text-center">
+          <h2 className="text-2xl font-bold">No roles yet</h2>
+          <p className="mt-2 text-base text-muted">Add one role you already care about.</p>
+          <Link className="mt-5 inline-flex h-12 items-center rounded-full bg-indigo px-6 font-bold text-white" href="/search">
+            Find a role
+          </Link>
         </div>
       ) : (
         <div data-testid="tracker-board" className="flex gap-3 overflow-x-auto pb-3">
@@ -84,33 +67,41 @@ export function TrackerBoard({ jobs }: { jobs: TrackerCard[] }) {
             return (
               <section
                 key={stage.id}
-                className="w-72 shrink-0 rounded-2xl bg-[#ebe4d6] p-2"
+                className={`w-72 shrink-0 rounded-3xl p-3 ${tones[stage.id] ?? "bg-canvas"}`}
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
                   const id = event.dataTransfer.getData("text/plain");
                   if (id) move(id, stage.id);
                 }}
               >
-                <header className="flex items-center justify-between px-2 py-1 text-sm">
-                  <h2 className="font-medium">{stage.label}</h2>
-                  <span className="text-muted">{cards.length}</span>
+                <header className="flex items-center justify-between px-1 py-1">
+                  <h2 className="flex items-center gap-2 font-bold">
+                    <span className={`h-3 w-3 rounded-full ${dots[stage.id] ?? "bg-indigo"}`} />
+                    {stage.label}
+                  </h2>
+                  <span className="text-sm font-semibold text-muted">{cards.length}</span>
                 </header>
-                <div className="space-y-2">
+                <div className="mt-2 space-y-2">
                   {cards.map((job) => (
-                    <article key={job.id} draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", job.id)} className="desk-card cursor-grab p-3">
-                      <Link href={`/tracker/${job.id}`} className="font-medium leading-5">
+                    <article key={job.id} draggable onDragStart={(event) => event.dataTransfer.setData("text/plain", job.id)} className="cursor-grab rounded-2xl bg-paper p-4 shadow-sm">
+                      <Link href={`/tracker/${job.id}`} className="text-base font-bold leading-5">
                         {job.title}
                       </Link>
                       <p className="text-sm text-muted">{job.company}</p>
-                      <p className="mt-2 text-xs text-muted">{[job.location, job.workMode].filter(Boolean).join(" · ")}</p>
+                      <p className="mt-2 text-sm text-muted">{[job.location, job.workMode].filter(Boolean).join(" · ")}</p>
                       {job.fitScore != null ? (
-                        <p className="mt-2 inline-block rounded-full bg-mist px-2 py-0.5 text-xs text-pine">
+                        <p className="mt-2 inline-block rounded-full bg-mist px-2 py-0.5 text-xs font-semibold text-indigo-deep">
                           {job.fitBand} {job.fitScore}
                         </p>
                       ) : null}
+                      <select className="field mt-3" value={job.status} aria-label={`Move ${job.title}`} onChange={(event) => move(job.id, event.target.value)}>
+                        {JOB_STAGES.map((item) => (
+                          <option key={item.id} value={item.id}>{item.label}</option>
+                        ))}
+                      </select>
                     </article>
                   ))}
-                  {cards.length === 0 ? <p className="px-2 py-4 text-xs text-muted">Drop a role here.</p> : null}
+                  {cards.length === 0 ? <p className="px-2 py-6 text-sm text-muted">Drop a role here.</p> : null}
                 </div>
               </section>
             );
