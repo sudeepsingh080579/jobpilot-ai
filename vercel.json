@@ -1,0 +1,3 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && node scripts/seed-if-enabled.mjs && next build"
+}

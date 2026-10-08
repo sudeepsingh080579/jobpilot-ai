@@ -38,7 +38,7 @@ export default async function ResumeStepPage() {
         </div>
       ) : (
         <div className="desk-card p-5">
-          <p className="mb-3 text-base">PDF, DOCX, or a paste. Five megabytes is the limit.</p>
+          <p className="mb-3 text-base">PDF, DOCX, or a paste. Four megabytes is the limit.</p>
           <JourneyUpload />
         </div>
       )}

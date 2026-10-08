@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { shouldSeedDemo } from "../src/lib/deploy";
 import { brand } from "../src/lib/brand";
 import { stringifyJson } from "../src/lib/json";
 import { DEFAULT_TEMPLATES } from "../src/lib/outreach/templates";
@@ -12,6 +13,10 @@ import { weekKey } from "../src/lib/utils";
 const prisma = new PrismaClient();
 
 async function main() {
+  if (!shouldSeedDemo(process.env.SEED_DEMO)) {
+    console.log("SEED_DEMO is not 1. Skipping demo seed.");
+    return;
+  }
   const existing = await prisma.user.findUnique({ where: { email: brand.demoEmail } });
   if (existing) {
     console.log("Demo user already present.");

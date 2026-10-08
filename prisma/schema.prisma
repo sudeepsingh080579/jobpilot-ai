@@ -1,15 +1,16 @@
 // JobPilot AI data model.
-// Dev provider is SQLite. For Postgres, change provider to "postgresql",
-// point DATABASE_URL at the database, and create a fresh migration.
-// The schema uses only portable Prisma types (no SQLite-only native types).
+// Postgres everywhere: local Docker (see docker-compose.yml) and Neon on Vercel.
+// DATABASE_URL is the runtime connection (pooled on Neon).
+// DIRECT_URL is the unpooled connection Prisma uses for migrations.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -190,6 +191,10 @@ model Resume {
   isPrimary   Boolean  @default(false)
   rawText     String   @default("")
   content     String   @default("{}")
+  fileName    String   @default("")
+  mimeType    String   @default("")
+  fileUrl     String   @default("")
+  fileData    Bytes?
   score       Int?
   scoreDetail String   @default("{}")
   createdAt   DateTime @default(now())

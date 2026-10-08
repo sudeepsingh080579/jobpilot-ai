@@ -33,7 +33,7 @@ export function ResumeIntake() {
         }}
       >
         <h2 className="font-serif text-2xl">Upload</h2>
-        <p className="mt-1 text-sm text-muted">PDF, DOCX, or TXT. 5 MB max. Parsing is best-effort — you can fix every field after.</p>
+        <p className="mt-1 text-sm text-muted">PDF, DOCX, or TXT. 4 MB max. Parsing is best-effort — you can fix every field after.</p>
         <input className="mt-3 block w-full text-sm" name="file" type="file" accept=".pdf,.docx,.txt,application/pdf" required />
         <Button className="mt-3" type="submit" disabled={pending}>Upload and parse</Button>
       </form>

@@ -14,7 +14,9 @@ import { scoreFit } from "@/lib/scoring/fit";
 import { analyzeAnswer } from "@/lib/scoring/interview";
 import { scoreNegotiation } from "@/lib/scoring/negotiation";
 import { scoreResume } from "@/lib/scoring/resume-score";
+import { secureCookiesEnabled, shouldSeedDemo, usesBlobStore } from "@/lib/deploy";
 import { journeyState } from "@/lib/journey";
+import { MAX_UPLOAD_BYTES } from "@/lib/uploads";
 import { buildWeeklyPlan } from "@/lib/scoring/weekly";
 import type { ResumeContent } from "@/lib/resume/types";
 
@@ -277,6 +279,22 @@ describe("plans, routing, interviews, outreach", () => {
     });
     expect(done.next).toBeNull();
     expect(done.completed).toBe(6);
+  });
+
+  it("keeps demo seed, blob storage, and secure cookies behind explicit flags", () => {
+    expect(shouldSeedDemo(undefined)).toBe(false);
+    expect(shouldSeedDemo("")).toBe(false);
+    expect(shouldSeedDemo("0")).toBe(false);
+    expect(shouldSeedDemo("1")).toBe(true);
+    expect(shouldSeedDemo("true")).toBe(true);
+    expect(usesBlobStore(undefined)).toBe(false);
+    expect(usesBlobStore("  ")).toBe(false);
+    expect(usesBlobStore("vercel_blob_token")).toBe(true);
+    expect(secureCookiesEnabled({})).toBe(false);
+    expect(secureCookiesEnabled({ AUTH_URL: "http://127.0.0.1:41731" })).toBe(false);
+    expect(secureCookiesEnabled({ AUTH_URL: "https://jobpilot.vercel.app" })).toBe(true);
+    expect(secureCookiesEnabled({ VERCEL: "1" })).toBe(true);
+    expect(MAX_UPLOAD_BYTES).toBeLessThanOrEqual(4.5 * 1024 * 1024);
   });
 
   it("keeps a deep question bank", () => {
