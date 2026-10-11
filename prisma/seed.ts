@@ -28,7 +28,7 @@ async function main() {
     data: {
       email: brand.demoEmail,
       passwordHash,
-      name: "Sudeep",
+      name: "Alex",
       headline: "Director, cloud platform and DevOps",
       location: "Bengaluru · open to US remote",
       yearsExperience: 16,
@@ -36,6 +36,10 @@ async function main() {
       seniority: "Director",
       targetCompensation: "₹90L–₹1.4Cr in India, or $230k–$300k US remote",
       timezone: "Asia/Kolkata",
+      currency: "INR",
+      emailVerified: new Date(),
+      // Demo desks get a 30-day Pro trial so every tool can be shown.
+      trialEndsAt: new Date(Date.now() + 30 * 86400000),
       templates: { create: DEFAULT_TEMPLATES },
     },
   });
@@ -87,7 +91,7 @@ async function main() {
 
   const content: ResumeContent = {
     ...emptyResume(),
-    name: "Sudeep",
+    name: "Alex",
     headline: "Director, Cloud Platform & DevOps",
     location: "Bengaluru · US remote",
     email: brand.demoEmail,
@@ -261,7 +265,7 @@ async function main() {
           title: "Razorpay · Director, Platform Engineering",
           template: "letterhead",
           content:
-            "Dear hiring manager,\n\nI am writing for the Director, Platform Engineering role. The part I want to pressure-test is whether the platform is a product or a queue.\n\nRecent work cut new-service lead time from three weeks to two days and took 28% out of cloud run-rate without a freeze.\n\nI would like forty minutes on the ticket themes and the bill.\n\nSincerely,\nSudeep",
+            "Dear hiring manager,\n\nI am writing for the Director, Platform Engineering role. The part I want to pressure-test is whether the platform is a product or a queue.\n\nRecent work cut new-service lead time from three weeks to two days and took 28% out of cloud run-rate without a freeze.\n\nI would like forty minutes on the ticket themes and the bill.\n\nSincerely,\nAlex",
         },
       });
     }
@@ -311,7 +315,7 @@ async function main() {
       contactId: contact.id,
       step: "PITCH",
       status: "DRAFT",
-      body: "Hi Asha — I am Sudeep, a director looking at a platform conversation with Razorpay. I will not ask for a call in this note. If you are close to the hiring manager, I can send a five-line brief.",
+      body: "Hi Asha — I am Alex, a director looking at a platform conversation with Razorpay. I will not ask for a call in this note. If you are close to the hiring manager, I can send a five-line brief.",
     },
   });
 
@@ -410,7 +414,7 @@ async function main() {
       {
         userId: user.id,
         role: "assistant",
-        content: "Sudeep, the Razorpay panel and the Cloudflare offer are the week. Rehearse the panel, then write the counter before you talk numbers. Do not open a wider search until those two move.",
+        content: "Alex, the Razorpay panel and the Cloudflare offer are the week. Rehearse the panel, then write the counter before you talk numbers. Do not open a wider search until those two move.",
         module: "assistant",
       },
     ],

@@ -26,7 +26,7 @@ export function providerStatus(): ProviderStatus[] {
 }
 
 async function searchAdzuna(query: JobQuery): Promise<JobResult[]> {
-  const country = process.env.ADZUNA_COUNTRY || "in";
+  const country = process.env.ADZUNA_COUNTRY || "us";
   const params = new URLSearchParams({
     app_id: process.env.ADZUNA_APP_ID ?? "",
     app_key: process.env.ADZUNA_APP_KEY ?? "",

@@ -116,7 +116,7 @@ export function NicheStarter({ titleHint }: { titleHint: string }) {
         </label>
         <label className="block text-sm font-medium">
           Where
-          <input className="field mt-1" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Bengaluru or Remote" />
+          <input className="field mt-1" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="London, Toronto or Remote" />
         </label>
         <label className="block text-sm font-medium">
           Skills to include

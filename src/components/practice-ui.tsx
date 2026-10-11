@@ -200,8 +200,8 @@ export function NegotiateSetup({ jobs }: { jobs: { id: string; title: string; co
   const { error, pending, run } = useRun();
   const [title, setTitle] = useState(jobs[0] ? `${jobs[0].title} at ${jobs[0].company}` : "Offer");
   const [jobId, setJobId] = useState(jobs[0]?.id ?? "");
-  const [target, setTarget] = useState("₹1.2Cr or $260k");
-  const [floor, setFloor] = useState("₹95L or $230k");
+  const [target, setTarget] = useState("$260k total");
+  const [floor, setFloor] = useState("$230k total");
   const [offer, setOffer] = useState("");
   const [difficulty, setDifficulty] = useState("medium");
   return (

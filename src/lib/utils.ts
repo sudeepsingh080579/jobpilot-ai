@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatWhen(date: Date | string, timeZone = "Asia/Kolkata") {
-  return new Intl.DateTimeFormat("en-IN", {
+export function formatWhen(date: Date | string, timeZone = "UTC") {
+  return new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -37,4 +37,11 @@ export function splitList(value: string) {
 
 export function joinList(value: string[] | undefined) {
   return (value ?? []).join(", ");
+}
+
+/** Locale-aware money formatting. Defaults to USD; any ISO currency works (INR shows ₹ with lakh grouping). */
+export function formatMoney(amount: number, currency = "USD", locale?: string) {
+  const code = currency.toUpperCase();
+  const loc = locale ?? (code === "INR" ? "en-IN" : "en-US");
+  return new Intl.NumberFormat(loc, { style: "currency", currency: code, maximumFractionDigits: amount % 1 === 0 ? 0 : 2 }).format(amount);
 }

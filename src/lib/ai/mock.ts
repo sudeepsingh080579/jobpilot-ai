@@ -36,11 +36,11 @@ export function mockAi(task: AiTask, input: unknown): unknown {
             industries: ["B2B SaaS", "Fintech", "Developer tools"],
             seniority: "Director",
             companyTypes: ["Series C to public product companies"],
-            locations: ["Bengaluru", "Remote India", "US remote"],
+            locations: ["Your city", "Remote (your time zone)", "Remote, global"],
             includeKeywords: ["platform", "kubernetes", "developer experience", "reliability"],
             excludeKeywords: ["helpdesk", "pure sales engineering"],
             why: "Your scope already sounds like a platform org: golden paths, cost, and incident leadership. Product companies pay for that as a director seat, not as a tools team.",
-            payBenchmark: "India ₹80L–₹1.4Cr, or US remote $220k–$300k total, for director-level platform roles.",
+            payBenchmark: "Director-level platform roles: roughly $220k–$300k total in the US, €150k–€220k in Western Europe. Check local salary data for your market.",
           },
           {
             name: "Reliability and cloud operations",
@@ -49,11 +49,11 @@ export function mockAi(task: AiTask, input: unknown): unknown {
             industries: ["Payments", "Marketplaces", "SaaS"],
             seniority: "Head",
             companyTypes: ["High-traffic consumer or fintech"],
-            locations: ["Hyderabad", "Bengaluru", "Remote"],
+            locations: ["Major tech hubs", "Remote"],
             includeKeywords: ["sre", "error budget", "on-call", "multi-region"],
             excludeKeywords: ["noc analyst", "rotating shift lead"],
             why: "If the story you want to tell is incident command and error budgets, a reliability title outperforms a generic DevOps manager title.",
-            payBenchmark: "Head of SRE in India often lands ₹70L–₹1.2Cr. US remote director bands sit higher.",
+            payBenchmark: "Head of SRE bands vary widely by market; US remote director bands sit at the top of the range.",
           },
           {
             name: "FinOps-minded cloud director",
@@ -62,11 +62,11 @@ export function mockAi(task: AiTask, input: unknown): unknown {
             industries: ["Enterprise SaaS", "Banking technology"],
             seniority: "Director",
             companyTypes: ["Companies with a visible cloud bill"],
-            locations: ["Mumbai", "Bengaluru", "US East remote"],
+            locations: ["Financial centres", "Remote, overlapping US or EU hours"],
             includeKeywords: ["finops", "aws", "migration", "unit cost"],
             excludeKeywords: ["data entry", "it support"],
-            why: "A cost-and-migration narrative is concrete in both Indian product firms and US remote roles.",
-            payBenchmark: "Director cloud seats cluster around ₹90L+ in India and $230k+ in the US when the bill is large.",
+            why: "A cost-and-migration narrative is concrete for product companies in any market.",
+            payBenchmark: "Director cloud seats pay a premium where the cloud bill is large, often $230k+ in the US.",
           },
         ],
       };
@@ -91,7 +91,7 @@ export function mockAi(task: AiTask, input: unknown): unknown {
       };
     case "swot":
       return {
-        strengths: ["You can tie platform work to cost, reliability, and delivery speed.", "Director-level scope is already in the story.", "India and US remote both fit the niche."],
+        strengths: ["You can tie platform work to cost, reliability, and delivery speed.", "Director-level scope is already in the story.", "Both local and remote roles fit the niche."],
         weaknesses: ["The resume may under-explain org leadership versus hands-on design.", "Security and data platform depth should be explicit if a role asks for them."],
         opportunities: ["Product companies are hiring platform directors to replace ticket-driven DevOps.", "A short pitch on cloud unit cost opens doors that a generic application will not."],
         threats: ["Roles titled DevOps Manager will down-level you.", "A wide niche makes every description look like a maybe."],
@@ -120,14 +120,14 @@ export function mockAi(task: AiTask, input: unknown): unknown {
       };
     case "resume_tailor":
       return {
-        summary: `${title} focused on the outcomes in this description: reliable delivery, a platform other teams can use without a ticket, and a cloud bill tied to product cost. Recent scope includes multi-team leadership across India and US hours.`,
+        summary: `${title} focused on the outcomes in this description: reliable delivery, a platform other teams can use without a ticket, and a cloud bill tied to product cost. Recent scope includes multi-team leadership across time zones.`,
         skillsToAdd: list(data.missed).slice(0, 6),
         notes: `Wove missing keywords into the summary and the most recent role. Left older roles alone so the resume still sounds like one person. ${variant ? "Second pass tightened the first bullet." : ""}`,
         bulletPrefix: "For this role: ",
       };
     case "cover_letter":
       return {
-        content: `Dear hiring manager,\n\nI am writing for the ${title} role at ${company}. I have spent the last several years building the unglamorous parts of a product company: the path a team uses to ship, the on-call system that does not depend on heroics, and a cloud bill that has an owner.\n\nWhat I would want to understand in the first conversation is where delivery is slow, where incidents still surprise you, and whether the platform is a product or a ticket queue. The roles I have held recently were judged on those three things, not on tools adopted.\n\nI am based in India and work US hours when the team needs it. I would like to talk about the first 90 days, not a tool list.\n\nSincerely,\n${name}`,
+        content: `Dear hiring manager,\n\nI am writing for the ${title} role at ${company}. I have spent the last several years building the unglamorous parts of a product company: the path a team uses to ship, the on-call system that does not depend on heroics, and a cloud bill that has an owner.\n\nWhat I would want to understand in the first conversation is where delivery is slow, where incidents still surprise you, and whether the platform is a product or a ticket queue. The roles I have held recently were judged on those three things, not on tools adopted.\n\nI have led teams across time zones and overlap with yours when the work needs it. I would like to talk about the first 90 days, not a tool list.\n\nSincerely,\n${name}`,
       };
     case "stage_draft": {
       const kind = str(data.kind, "follow_up");
@@ -136,7 +136,7 @@ export function mockAi(task: AiTask, input: unknown): unknown {
         follow_up: `Hello — I applied for ${title} at ${company} and wanted to leave one concrete note rather than a bump. The part of the brief I would want to pressure-test is how platform work is funded versus ticket work. Happy to share a one-page view if useful.`,
         thank_you: `Thank you for the time today on ${title}. The point I am still thinking about is the tension between reliability work and feature pressure. I will send the one-page 90-day outline we discussed.`,
         questions: `1. Where does the platform team still take tickets that a product team should self-serve?\n2. What does a bad quarter look like for this role — cost, incidents, or delivery?\n3. Who disagrees with the platform strategy today, and why?\n4. How is the cloud bill reviewed with finance?\n5. What would you want true in 90 days that is not true now?`,
-        reschedule: `I need to move our ${title} conversation. I can do the same time tomorrow, or the following morning India time / evening US Eastern. Sorry for the shuffle.`,
+        reschedule: `I need to move our ${title} conversation. I can do the same time tomorrow, or the following morning, whichever suits you. Sorry for the shuffle.`,
         accept: `I am glad to accept the ${title} offer at ${company} on the terms we closed: base, sign-on, and the review timing we wrote down. I will return the signed letter today.`,
         decline: `Thank you for the offer for ${title}. I am going to decline. The scope is interesting, and the level and compensation did not land where I need them to. I hope we can stay in touch.`,
       };
@@ -148,7 +148,7 @@ export function mockAi(task: AiTask, input: unknown): unknown {
           { title: "Platform is still a ticket queue", detail: `${company} likely has product teams waiting on a central DevOps group for environments, access, and pipelines.` },
           { title: "Cloud cost has no product owner", detail: "The bill is visible to finance and vague to engineering. Unit cost is not in the operating review." },
           { title: "Incidents depend on a few people", detail: "On-call is heroics. Error budgets are not something a director can show a CEO." },
-          { title: "India and US hours are two teams", detail: "Handoffs drop context. A leader who has run both clocks is the actual job, even if the posting does not say so." },
+          { title: "Two time zones are two teams", detail: "Handoffs drop context. A leader who has run both clocks is the actual job, even if the posting does not say so." },
         ],
       };
     case "pitch_deck":
@@ -174,13 +174,13 @@ export function mockAi(task: AiTask, input: unknown): unknown {
         posts: [
           { theme: "Achievement", content: `We stopped measuring the platform team on tickets closed.\n\nThe number that mattered was how long a product squad waited for a new service. It was three weeks. Most of that wait was access, a pipeline, and an environment somebody had to build by hand.\n\nWe paved one path. Lead time went to two days. The ticket queue got quieter, which is the point.\n\nIf your platform team is proud of how many requests it clears, ask what the squads are waiting on.` },
           { theme: "Industry note", content: `A lot of "DevOps transformation" postings are actually a reliability and cost problem with a tool list stapled on.\n\nThe director job, when it is real, is to make delivery, incidents, and unit cost visible to people who do not live in the cluster.\n\nIf the interview never mentions the bill or the on-call, you are interviewing for a different job than the one in the title.` },
-          { theme: "Personal observation", content: `Working India hours with a US team taught me to write the decision down before the other timezone wakes up.\n\nThe handoff is the product. A Slack thread is not a system of record. The teams that felt calm had a short written review: what changed, what broke, what we are not doing.\n\nIt is less glamorous than a new platform. It is why the new platform survives contact with a second office.` },
+          { theme: "Personal observation", content: `Working across time zones taught me to write the decision down before the other timezone wakes up.\n\nThe handoff is the product. A Slack thread is not a system of record. The teams that felt calm had a short written review: what changed, what broke, what we are not doing.\n\nIt is less glamorous than a new platform. It is why the new platform survives contact with a second office.` },
         ],
       };
     case "linkedin_profile":
       return {
         headline: `${title} | Platform, reliability, and cloud cost for product companies`,
-        about: `${name === "there" ? "I" : name} lead platform and DevOps organizations through the phase where tickets, incidents, and the cloud bill all become leadership problems.\n\nThe work I want is specific: a paved path product teams can use, an on-call rotation a new hire can join, and a cost number a CFO can follow. I have done that across India and with US teams.\n\nI am not looking for a tool-admin seat. If you are hiring a director who can sit with engineering and with finance, I would like to talk.`,
+        about: `${name === "there" ? "I" : name} lead platform and DevOps organizations through the phase where tickets, incidents, and the cloud bill all become leadership problems.\n\nThe work I want is specific: a paved path product teams can use, an on-call rotation a new hire can join, and a cost number a CFO can follow. I have done that with distributed teams across time zones.\n\nI am not looking for a tool-admin seat. If you are hiring a director who can sit with engineering and with finance, I would like to talk.`,
       };
     case "interview_questions":
       return {

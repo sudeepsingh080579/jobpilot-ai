@@ -2,7 +2,7 @@ export type BankQuestion = { category: string; prompt: string; lookFor: string[]
 
 export const QUESTION_BANK: BankQuestion[] = [
   { category: "Leadership", mode: "behavioral", prompt: "Tell me about a decision you made that a strong staff engineer disagreed with.", lookFor: ["decision", "risk", "stakeholder"] },
-  { category: "Leadership", mode: "behavioral", prompt: "How do you run a team that spans India and US hours?", lookFor: ["handoff", "written", "timezone"] },
+  { category: "Leadership", mode: "behavioral", prompt: "How do you run a team that spans several time zones?", lookFor: ["handoff", "written", "timezone"] },
   { category: "Leadership", mode: "behavioral", prompt: "Describe a time you stopped a project that had momentum.", lookFor: ["tradeoff", "cost", "focus"] },
   { category: "Platform", mode: "technical", prompt: "Walk through how you would replace a ticket queue with a paved path.", lookFor: ["self-serve", "lead time", "ticket"] },
   { category: "Platform", mode: "technical", prompt: "How do you choose between Kubernetes on one cloud and a multi-cloud estate?", lookFor: ["aws", "complexity", "team"] },
