@@ -24,7 +24,11 @@ model User {
   currentTitle           String   @default("")
   seniority              String   @default("")
   targetCompensation     String   @default("")
-  timezone               String   @default("Asia/Kolkata")
+  timezone               String   @default("UTC")
+  currency               String   @default("USD")
+  emailVerified          DateTime?
+  trialEndsAt            DateTime?
+  marketingConsent       Boolean  @default(false)
   pastedProfile          String   @default("")
   headlineSuggestion     String   @default("")
   aboutSuggestion        String   @default("")
@@ -48,6 +52,62 @@ model User {
   pushSubs       PushSubscription[]
   templates      OutreachTemplate[]
   swot           SwotReport?
+  subscription   Subscription?
+  aiUsage        AiUsage[]
+  authTokens     AuthToken[]
+}
+
+/// One Stripe subscription per user. Written only by the Stripe webhook.
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId     String    @unique
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  /// "pro_monthly" | "pro_annual" | "" when unknown
+  plan                 String    @default("")
+  /// Stripe status: trialing, active, past_due, canceled, unpaid, incomplete, incomplete_expired, paused
+  status               String    @default("incomplete")
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  currency             String    @default("usd")
+  /// Monthly-normalised amount in minor units, used for the admin MRR figure.
+  mrrCents             Int       @default(0)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+/// Processed Stripe event ids, so webhook retries are idempotent.
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
+}
+
+/// AI actions used per calendar month (UTC), for plan limits.
+model AiUsage {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period String
+  count  Int    @default(0)
+
+  @@unique([userId, period])
+}
+
+/// Single-use email verification and password reset tokens (sha256 hashed).
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, kind])
 }
 
 model Niche {

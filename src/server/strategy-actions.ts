@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { completeJson } from "@/lib/ai";
+import { aiGate, meteredAi } from "@/server/billing";
 import { parseJson, stringifyJson } from "@/lib/json";
 import type { NicheInput } from "@/lib/inputs";
 import { prisma } from "@/lib/prisma";
@@ -64,7 +64,9 @@ export async function saveNiche(input: NicheInput) {
 export async function suggestNiches() {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
-  const result = await completeJson<{ niches: { name: string; title: string; aliases: string[]; industries: string[]; seniority: string; companyTypes: string[]; locations: string[]; includeKeywords: string[]; excludeKeywords: string[]; why: string; payBenchmark: string }[] }>("niche_suggest", {
+  const gate = await aiGate(user, "niche_suggest");
+  if (gate) return gate;
+  const result = await meteredAi<{ niches: { name: string; title: string; aliases: string[]; industries: string[]; seniority: string; companyTypes: string[]; locations: string[]; includeKeywords: string[]; excludeKeywords: string[]; why: string; payBenchmark: string }[] }>(user, "niche_suggest", {
     name: user.name,
     title: user.currentTitle,
     location: user.location,
@@ -109,6 +111,8 @@ export async function acceptNicheSuggestion(suggestion: {
 export async function scoreSavedJobs() {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "fit_narrative");
+  if (gate) return gate;
   const niche = await prisma.niche.findFirst({ where: { userId: user.id, isPrimary: true } });
   if (!niche) return fail("Save a primary niche before scoring fit.");
   const skills = await prisma.skill.findMany({ where: { userId: user.id } });
@@ -129,12 +133,12 @@ export async function scoreSavedJobs() {
       job: { title: job.title, company: job.company, location: job.location, description: job.description },
       skills: skills.map((skill) => skill.name),
     });
-    const narrative = await completeJson<{ narrative: string }>("fit_narrative", {
+    const narrative = await meteredAi<{ narrative: string }>(user, "fit_narrative", {
       band: fit.band,
       jobTitle: job.title,
       company: job.company,
       skills: skills.map((skill) => skill.name),
-    });
+    }).catch(() => ({ data: { narrative: "" } }));
     await prisma.job.update({
       where: { id: job.id },
       data: { fitScore: fit.score, fitBand: fit.band, fitDetail: stringifyJson({ ...fit, narrative: narrative.data.narrative }) },
@@ -148,8 +152,10 @@ export async function scoreSavedJobs() {
 export async function refreshSkillMap() {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "skill_map");
+  if (gate) return gate;
   const jobs = await prisma.job.findMany({ where: { userId: user.id }, take: 6 });
-  const result = await completeJson<{ skills: { name: string; category: string; level: number; variants: string[] }[] }>("skill_map", {
+  const result = await meteredAi<{ skills: { name: string; category: string; level: number; variants: string[] }[] }>(user, "skill_map", {
     name: user.name,
     descriptions: jobs.map((job) => job.description).join("\n").slice(0, 4000),
   });
@@ -171,9 +177,11 @@ export async function refreshSkillMap() {
 export async function buildSwot() {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "swot");
+  if (gate) return gate;
   const jobs = await prisma.job.count({ where: { userId: user.id } });
   if (jobs < 1) return fail("Save at least one job before building a SWOT. Five makes it sharper.");
-  const result = await completeJson<{ strengths: string[]; weaknesses: string[]; opportunities: string[]; threats: string[]; actions: string[] }>("swot", {
+  const result = await meteredAi<{ strengths: string[]; weaknesses: string[]; opportunities: string[]; threats: string[]; actions: string[] }>(user, "swot", {
     name: user.name,
     title: user.currentTitle,
     jobs,
@@ -228,7 +236,9 @@ export async function saveCar(input: { id?: string; company: string; role: strin
 export async function suggestCar(company: string, role: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
-  const result = await completeJson<{ scenarios: { challenge: string; action: string; result: string; bullet: string }[] }>("car_scenarios", {
+  const gate = await aiGate(user, "car_scenarios");
+  if (gate) return gate;
+  const result = await meteredAi<{ scenarios: { challenge: string; action: string; result: string; bullet: string }[] }>(user, "car_scenarios", {
     company,
     role,
     name: user.name,
@@ -247,9 +257,11 @@ export async function deleteCar(id: string) {
 export async function masterResumeFromCar() {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "resume_from_car");
+  if (gate) return gate;
   const cars = await prisma.carStatement.findMany({ where: { userId: user.id }, orderBy: { createdAt: "asc" } });
   if (cars.length === 0) return fail("Add at least one Challenge-Action-Result note first.");
-  const summary = await completeJson<{ summary: string }>("resume_from_car", {
+  const summary = await meteredAi<{ summary: string }>(user, "resume_from_car", {
     name: user.name,
     title: user.currentTitle || user.headline,
     cars: cars.map((car) => ({ company: car.company, role: car.role, bullet: car.resumeBullet || `${car.action} ${car.result}` })),

@@ -8,6 +8,7 @@ import { brand } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 import { Mark } from "@/components/mark";
 import { AssistantDock } from "@/components/assistant-dock";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 
 type Message = { id: string; role: string; content: string; rating: number | null };
 
@@ -44,8 +45,12 @@ export function AppShell({
   name,
   messages,
   jobs,
+  planLabel,
+  banner,
   children,
 }: {
+  planLabel?: string;
+  banner?: React.ReactNode;
   name: string;
   messages: Message[];
   jobs: { id: string; title: string; company: string }[];
@@ -70,9 +75,19 @@ export function AppShell({
             </Link>
           ))}
         </nav>
-        <span className="text-sm font-medium text-muted">{first}</span>
+        <span className="flex items-center gap-2 text-sm font-medium text-muted">
+          {planLabel ? (
+            <Link href="/settings/billing" data-testid="plan-pill" className="rounded-full bg-sun px-3 py-1 text-xs font-bold text-ink">
+              {planLabel}
+            </Link>
+          ) : null}
+          {first}
+        </span>
       </header>
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 pb-36 md:px-8 md:pb-28">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 pb-36 md:px-8 md:pb-28">
+        {banner}
+        {children}
+      </main>
       <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-line bg-paper md:hidden">
         {links.slice(0, 2).map((item) => {
           const Icon = item.icon;
@@ -92,6 +107,7 @@ export function AppShell({
           More
         </Link>
       </nav>
+      <UpgradePrompt />
       <AssistantDock open={chatOpen} onOpenChange={setChatOpen} messages={messages} jobs={jobs} />
     </div>
   );

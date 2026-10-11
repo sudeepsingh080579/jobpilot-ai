@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { completeJson } from "@/lib/ai";
+import { aiGate, meteredAi } from "@/server/billing";
 import { routeIntent } from "@/lib/assistant/route";
 import { parseJson } from "@/lib/json";
 import { prisma } from "@/lib/prisma";
@@ -24,6 +24,8 @@ const QUICK: Record<string, { label: string; href: string; module: string }> = {
 export async function sendAssistant(input: { message: string; jobId?: string; intent?: string; variant?: number }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "chat");
+  if (gate) return gate;
   const message = input.message.trim();
   if (!message && !input.intent) return fail("Write a message first.");
   const niche = await prisma.niche.findFirst({ where: { userId: user.id, isPrimary: true } });
@@ -40,7 +42,7 @@ export async function sendAssistant(input: { message: string; jobId?: string; in
   let href = route.href;
   try {
     if (input.intent === "cover" && job) {
-      const ai = await completeJson<{ content: string }>("cover_letter", {
+      const ai = await meteredAi<{ content: string }>(user, "cover_letter", {
         name: user.name,
         title: job.title,
         company: job.company,
@@ -75,7 +77,7 @@ export async function sendAssistant(input: { message: string; jobId?: string; in
         job,
         skills: skills.map((skill) => skill.name),
       });
-      const narrative = await completeJson<{ narrative: string }>("fit_narrative", { band: fit.band, jobTitle: job.title, company: job.company, skills: skills.map((s) => s.name) });
+      const narrative = await meteredAi<{ narrative: string }>(user, "fit_narrative", { band: fit.band, jobTitle: job.title, company: job.company, skills: skills.map((s) => s.name) });
       href = `/tracker/${job.id}`;
       detail = `${fit.band} fit, ${fit.score}/100. ${narrative.data.narrative}`;
     } else if (input.intent === "interview" && job) {
@@ -97,7 +99,7 @@ export async function sendAssistant(input: { message: string; jobId?: string; in
         hasPrimaryResume: Boolean(resume),
         postsThisWeek: posts,
       });
-      const ai = await completeJson<{ message: string }>("chat", {
+      const ai = await meteredAi<{ message: string }>(user, "chat", {
         name: user.name,
         niche: niche?.title ?? "your niche",
         message: display,

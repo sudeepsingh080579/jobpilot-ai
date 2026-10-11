@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { completeJson } from "@/lib/ai";
+import { aiGate, meteredAi } from "@/server/billing";
 import { parseJson, stringifyJson } from "@/lib/json";
 import type { ResumeInput } from "@/lib/inputs";
 import { prisma } from "@/lib/prisma";
@@ -75,6 +75,8 @@ export async function matchResumeToJob(resumeId: string, jobId: string) {
 export async function tailorResume(resumeId: string, jobId: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "resume_tailor");
+  if (gate) return gate;
   const resume = await ownedResume(resumeId, user.id);
   const job = await prisma.job.findFirst({ where: { id: jobId, userId: user.id } });
   if (!resume || !job) return fail("Resume or job not found.");
@@ -92,7 +94,7 @@ export async function tailorResume(resumeId: string, jobId: string) {
     certifications: [],
   });
   const ats = matchKeywords(resumeToText(content), job.description);
-  const ai = await completeJson<{ summary: string; skillsToAdd: string[]; notes: string; bulletPrefix?: string }>("resume_tailor", {
+  const ai = await meteredAi<{ summary: string; skillsToAdd: string[]; notes: string; bulletPrefix?: string }>(user, "resume_tailor", {
     name: user.name,
     title: job.title,
     company: job.company,
@@ -131,13 +133,15 @@ export async function tailorResume(resumeId: string, jobId: string) {
 export async function generateLetter(input: { jobId: string; resumeId?: string; template?: string }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "cover_letter");
+  if (gate) return gate;
   const job = await prisma.job.findFirst({ where: { id: input.jobId, userId: user.id } });
   if (!job) return fail("Choose a saved job first.");
   const resume = input.resumeId
     ? await ownedResume(input.resumeId, user.id)
     : await prisma.resume.findFirst({ where: { userId: user.id, isPrimary: true } });
   const content = resume ? parseJson<ResumeContent>(resume.content, null as unknown as ResumeContent) : null;
-  const ai = await completeJson<{ content: string }>("cover_letter", {
+  const ai = await meteredAi<{ content: string }>(user, "cover_letter", {
     name: user.name,
     title: job.title,
     company: job.company,
@@ -181,7 +185,9 @@ export async function deleteLetter(id: string) {
 export async function generatePosts() {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
-  const ai = await completeJson<{ posts: { theme: string; content: string }[] }>("linkedin_posts", {
+  const gate = await aiGate(user, "linkedin_posts");
+  if (gate) return gate;
+  const ai = await meteredAi<{ posts: { theme: string; content: string }[] }>(user, "linkedin_posts", {
     name: user.name,
     title: user.currentTitle || user.headline,
   });
@@ -213,8 +219,10 @@ export async function savePost(id: string, content: string) {
 export async function rewriteProfile(pastedProfile: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "linkedin_profile");
+  if (gate) return gate;
   if (pastedProfile.trim().length < 40) return fail("Paste a headline and About section, at least a short paragraph.");
-  const ai = await completeJson<{ headline: string; about: string }>("linkedin_profile", {
+  const ai = await meteredAi<{ headline: string; about: string }>(user, "linkedin_profile", {
     name: user.name,
     title: user.currentTitle || user.headline,
     pasted: pastedProfile,
@@ -234,9 +242,11 @@ export async function rewriteProfile(pastedProfile: string) {
 export async function researchCompany(companyId: string, notes: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "company_problems");
+  if (gate) return gate;
   const company = await prisma.targetCompany.findFirst({ where: { id: companyId, userId: user.id } });
   if (!company) return fail("Company not found.");
-  const ai = await completeJson<{ problems: { title: string; detail: string }[] }>("company_problems", {
+  const ai = await meteredAi<{ problems: { title: string; detail: string }[] }>(user, "company_problems", {
     company: company.name,
     notes: notes || company.notes,
     industry: company.industry,
@@ -253,8 +263,10 @@ export async function researchCompany(companyId: string, notes: string) {
 export async function createDeck(input: { companyId?: string; companyName: string; problem: string; proof: string }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "pitch_deck");
+  if (gate) return gate;
   if (!input.problem.trim()) return fail("Pick a problem before generating slides.");
-  const ai = await completeJson<{ slides: { kicker: string; title: string; body: string; bullets: string[] }[] }>("pitch_deck", {
+  const ai = await meteredAi<{ slides: { kicker: string; title: string; body: string; bullets: string[] }[] }>(user, "pitch_deck", {
     name: user.name,
     company: input.companyName,
     problem: input.problem,
@@ -278,12 +290,14 @@ export async function createDeck(input: { companyId?: string; companyName: strin
 export async function reviseSlide(input: { deckId: string; slideId: string; instruction: string }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "pitch_revise");
+  if (gate) return gate;
   const deck = await prisma.pitchDeck.findFirst({ where: { id: input.deckId, userId: user.id } });
   if (!deck) return fail("Deck not found.");
   const slides = parseJson<{ id: string; kicker: string; title: string; body: string; bullets: string[] }[]>(deck.slides, []);
   const slide = slides.find((item) => item.id === input.slideId);
   if (!slide) return fail("Slide not found.");
-  const ai = await completeJson<{ title: string; body: string; bullets: string[] }>("pitch_revise", {
+  const ai = await meteredAi<{ title: string; body: string; bullets: string[] }>(user, "pitch_revise", {
     instruction: input.instruction,
     title: slide.title,
     body: slide.body,

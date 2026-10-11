@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { completeJson } from "@/lib/ai";
+import { aiGate, meteredAi } from "@/server/billing";
 import { parseJson, stringifyJson } from "@/lib/json";
 import { pickQuestions } from "@/lib/interview/bank";
 import { analyzeAnswer } from "@/lib/scoring/interview";
@@ -24,6 +24,8 @@ type StoredQuestion = {
 export async function startInterview(input: { title: string; mode: string; jobId?: string; custom?: string; useAi?: boolean }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "interview_questions");
+  if (gate) return gate;
   let questions: { prompt: string; lookFor: string[] }[] = [];
   if (input.custom?.trim()) {
     questions = input.custom
@@ -33,7 +35,7 @@ export async function startInterview(input: { title: string; mode: string; jobId
       .slice(0, 5)
       .map((prompt) => ({ prompt, lookFor: ["result", "number"] }));
   } else if (input.useAi) {
-    const ai = await completeJson<{ questions: { prompt: string; lookFor: string[] }[] }>("interview_questions", {
+    const ai = await meteredAi<{ questions: { prompt: string; lookFor: string[] }[] }>(user, "interview_questions", {
       title: input.title,
       mode: input.mode,
       name: user.name,
@@ -70,13 +72,15 @@ export async function startInterview(input: { title: string; mode: string; jobId
 export async function saveInterviewAnswer(input: { sessionId: string; questionId: string; answer: string; durationSec: number }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "interview_feedback");
+  if (gate) return gate;
   const session = await prisma.interviewSession.findFirst({ where: { id: input.sessionId, userId: user.id } });
   if (!session) return fail("Session not found.");
   const questions = parseJson<StoredQuestion[]>(session.questions, []);
   const index = questions.findIndex((question) => question.id === input.questionId);
   if (index < 0) return fail("Question not found.");
   const analysis = analyzeAnswer(input.answer, input.durationSec, questions[index].lookFor);
-  const ai = await completeJson<{ alternate: string; coaching: string }>("interview_feedback", {
+  const ai = await meteredAi<{ alternate: string; coaching: string }>(user, "interview_feedback", {
     answer: input.answer,
     excerpt: input.answer.slice(0, 180),
     prompt: questions[index].prompt,
@@ -125,8 +129,10 @@ export async function finishInterview(sessionId: string) {
 export async function startNegotiation(input: { title: string; jobId?: string; target: string; floor: string; offer: string; difficulty: string }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "negotiation_script");
+  if (gate) return gate;
   if (!input.target.trim() || !input.floor.trim()) return fail("Set a target and a floor before the conversation.");
-  const ai = await completeJson<{ script: string }>("negotiation_script", {
+  const ai = await meteredAi<{ script: string }>(user, "negotiation_script", {
     name: user.name,
     title: input.title,
     company: input.title,
@@ -134,7 +140,7 @@ export async function startNegotiation(input: { title: string; jobId?: string; t
     floor: input.floor,
     offer: input.offer,
   });
-  const opening = await completeJson<{ reply: string }>("negotiation_turn", {
+  const opening = await meteredAi<{ reply: string }>(user, "negotiation_turn", {
     difficulty: input.difficulty,
     target: input.target,
     offer: input.offer,
@@ -162,12 +168,14 @@ export async function startNegotiation(input: { title: string; jobId?: string; t
 export async function negotiationTurn(sessionId: string, text: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "negotiation_turn");
+  if (gate) return gate;
   const session = await prisma.negotiationSession.findFirst({ where: { id: sessionId, userId: user.id } });
   if (!session) return fail("Session not found.");
   if (!text.trim()) return fail("Write a reply first.");
   const transcript = parseJson<TranscriptTurn[]>(session.transcript, []);
   transcript.push({ role: "you", text: text.trim() });
-  const ai = await completeJson<{ reply: string }>("negotiation_turn", {
+  const ai = await meteredAi<{ reply: string }>(user, "negotiation_turn", {
     difficulty: session.difficulty,
     target: session.target,
     offer: session.offer,
@@ -183,11 +191,13 @@ export async function negotiationTurn(sessionId: string, text: string) {
 export async function finishNegotiation(sessionId: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "negotiation_report");
+  if (gate) return gate;
   const session = await prisma.negotiationSession.findFirst({ where: { id: sessionId, userId: user.id } });
   if (!session) return fail("Session not found.");
   const transcript = parseJson<TranscriptTurn[]>(session.transcript, []);
   const scored = scoreNegotiation(transcript, session.target);
-  const ai = await completeJson<{ summary: string }>("negotiation_report", { target: session.target, overall: scored.overall });
+  const ai = await meteredAi<{ summary: string }>(user, "negotiation_report", { target: session.target, overall: scored.overall });
   const report = { ...scored, summary: ai.data.summary };
   await prisma.negotiationSession.update({
     where: { id: session.id },

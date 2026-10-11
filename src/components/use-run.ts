@@ -14,7 +14,12 @@ export function useRun() {
     start(async () => {
       const result = await task();
       if (!result.ok) {
-        setError(result.error);
+        const upgrade = result.error.endsWith("[upgrade]");
+        const message = result.error.replace(/\s*\[upgrade\]$/, "");
+        setError(message);
+        if (upgrade && typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("jobpilot:upgrade", { detail: message }));
+        }
         return;
       }
       onOk?.(result.data);

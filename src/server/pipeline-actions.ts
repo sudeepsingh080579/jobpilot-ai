@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { completeJson } from "@/lib/ai";
+import { aiGate, meteredAi } from "@/server/billing";
 import { htmlToText } from "@/lib/resume/parse";
 import { extractKeywords } from "@/lib/scoring/ats";
 import { searchJobs } from "@/lib/jobs/providers";
@@ -128,9 +128,11 @@ export async function updateJob(input: { id: string; status?: string; notes?: st
 export async function draftForStage(jobId: string, kind: string) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "stage_draft");
+  if (gate) return gate;
   const job = await prisma.job.findFirst({ where: { id: jobId, userId: user.id } });
   if (!job) return fail("Job not found.");
-  const ai = await completeJson<{ content: string }>("stage_draft", {
+  const ai = await meteredAi<{ content: string }>(user, "stage_draft", {
     kind,
     name: user.name,
     title: job.title,
@@ -193,6 +195,8 @@ export async function saveContact(input: { id?: string; name: string; title: str
 export async function draftOutreach(contactId: string, step: OutreachStepId) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
+  const gate = await aiGate(user, "outreach_draft");
+  if (gate) return gate;
   if (!OUTREACH_STEPS.some((item) => item.id === step)) return fail("Unknown step.");
   const contact = await prisma.contact.findFirst({ where: { id: contactId, userId: user.id }, include: { company: true, job: true } });
   if (!contact) return fail("Contact not found.");
@@ -205,7 +209,7 @@ export async function draftOutreach(contactId: string, step: OutreachStepId) {
     myName: user.name,
     hook: "the platform team is still the path every squad waits on",
   });
-  const ai = await completeJson<{ body: string }>("outreach_draft", {
+  const ai = await meteredAi<{ body: string }>(user, "outreach_draft", {
     filled,
     name: user.name,
     title: user.currentTitle,
