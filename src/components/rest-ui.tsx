@@ -7,6 +7,7 @@ import { COMPANY_STAGES, CONTACT_TYPES, OUTREACH_STEPS } from "@/lib/domain";
 import { createDeck, generatePosts, researchCompany, rewriteProfile, savePost } from "@/server/material-actions";
 import { draftOutreach, markDraftCopied, saveCompany, saveContact, saveTemplate } from "@/server/pipeline-actions";
 import { logoutAction } from "@/server/auth-actions";
+import { deleteAccountAction } from "@/server/privacy-actions";
 import { dispatchDueReminders, saveReminder, toggleReminder, updateProfile } from "@/server/account-actions";
 import { deleteCar, masterResumeFromCar, saveCar, suggestCar } from "@/server/strategy-actions";
 import { useRun } from "@/components/use-run";
@@ -357,7 +358,7 @@ export function SettingsForm({
   mode,
   providers,
 }: {
-  profile: { name: string; headline: string; location: string; yearsExperience: number; currentTitle: string; seniority: string; targetCompensation: string; timezone: string; email: string };
+  profile: { name: string; headline: string; location: string; yearsExperience: number; currentTitle: string; seniority: string; targetCompensation: string; timezone: string; currency: string; email: string };
   mode: string;
   providers: { name: string; configured: boolean; note: string }[];
 }) {
@@ -374,7 +375,8 @@ export function SettingsForm({
         <label className="text-sm">Seniority<input className="field mt-1" value={form.seniority} onChange={(e) => setForm({ ...form, seniority: e.target.value })} /></label>
         <label className="text-sm">Years<input className="field mt-1" type="number" value={form.yearsExperience} onChange={(e) => setForm({ ...form, yearsExperience: Number(e.target.value) })} /></label>
         <label className="text-sm">Timezone<input className="field mt-1" value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} /></label>
-        <label className="text-sm md:col-span-2">Target compensation<input className="field mt-1" value={form.targetCompensation} onChange={(e) => setForm({ ...form, targetCompensation: e.target.value })} /></label>
+        <label className="text-sm">Currency<select className="field mt-1" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>{CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
+        <label className="text-sm">Target compensation<input className="field mt-1" placeholder="e.g. 180,000 base + equity" value={form.targetCompensation} onChange={(e) => setForm({ ...form, targetCompensation: e.target.value })} /></label>
         <Button type="submit" disabled={pending}>Save profile</Button>
         {error ? <p className="text-sm text-bad">{error}</p> : null}
       </form>
@@ -385,15 +387,39 @@ export function SettingsForm({
           {providers.map((provider) => <li key={provider.name}>{provider.name}: {provider.configured ? "configured" : provider.note}</li>)}
         </ul>
         <ul className="mt-3 space-y-1 text-muted">
-          <li>Payments are not connected.</li>
           <li>A browser extension can later POST to /api/extensions/jobs. That route answers 501.</li>
           <li>LinkedIn sending is off. Outreach is copy-only.</li>
           <li>No camera analysis and no coach booking.</li>
         </ul>
       </section>
+      <section className="desk-card space-y-3 p-4 text-sm" data-testid="privacy-controls">
+        <h2 className="text-2xl font-bold">Billing and your data</h2>
+        <div className="flex flex-wrap gap-2">
+          <a className="rounded-full bg-sun px-4 py-2 font-bold text-ink" href="/settings/billing">Plan and billing</a>
+          <a className="rounded-full border border-line px-4 py-2 font-semibold" href="/api/account/export" data-testid="export-data">Download my data</a>
+        </div>
+        <DeleteAccount />
+      </section>
       <form action={logoutAction}>
         <Button variant="outline" type="submit">Sign out</Button>
       </form>
     </div>
+  );
+}
+
+const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "INR", "SGD", "AED", "JPY", "CHF", "SEK", "BRL", "MXN", "ZAR"];
+
+function DeleteAccount() {
+  const [confirm, setConfirm] = useState("");
+  return (
+    <form action={deleteAccountAction} className="rounded-2xl border border-bad/40 p-3">
+      <p className="font-semibold text-bad">Delete account</p>
+      <p className="mt-1 text-muted">This permanently deletes your account and everything in it, and cancels any subscription. It cannot be undone.</p>
+      <label className="mt-2 block">
+        Type DELETE to confirm
+        <input className="field mt-1" name="confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} data-testid="delete-confirm" />
+      </label>
+      <Button type="submit" variant="outline" className="mt-2" disabled={confirm !== "DELETE"}>Delete my account</Button>
+    </form>
   );
 }

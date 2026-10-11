@@ -21,6 +21,7 @@ export default async function SettingsPage() {
           seniority: user.seniority,
           targetCompensation: user.targetCompensation,
           timezone: user.timezone,
+          currency: user.currency,
           email: user.email,
         }}
       />

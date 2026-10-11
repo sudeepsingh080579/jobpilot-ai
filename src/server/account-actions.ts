@@ -15,6 +15,7 @@ export async function updateProfile(input: {
   seniority: string;
   targetCompensation: string;
   timezone: string;
+  currency?: string;
 }) {
   const user = await actionUser();
   if (!user) return fail("Sign in required");
@@ -29,12 +30,23 @@ export async function updateProfile(input: {
       currentTitle: input.currentTitle.trim(),
       seniority: input.seniority.trim(),
       targetCompensation: input.targetCompensation.trim(),
-      timezone: input.timezone.trim() || "Asia/Kolkata",
+      timezone: validTimezone(input.timezone.trim()) ? input.timezone.trim() : "UTC",
+      ...(input.currency && /^[A-Z]{3}$/.test(input.currency) ? { currency: input.currency } : {}),
     },
   });
   revalidatePath("/settings");
   revalidatePath("/dashboard");
   return ok({ id: user.id });
+}
+
+function validTimezone(zone: string) {
+  if (!zone) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function saveReminder(input: { title: string; body: string; dueAt: string; jobId?: string }) {
@@ -79,7 +91,7 @@ export async function dispatchDueReminders() {
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   let pushed = 0;
   if (publicKey && privateKey && subs.length && due.length) {
-    webpush.setVapidDetails(process.env.VAPID_SUBJECT || "mailto:demo@jobpilot.local", publicKey, privateKey);
+    webpush.setVapidDetails(process.env.VAPID_SUBJECT || `mailto:${process.env.SUPPORT_EMAIL || "support@example.com"}`, publicKey, privateKey);
     for (const reminder of due) {
       const payload = JSON.stringify({ title: reminder.title, body: reminder.body || "A follow-up is due.", url: "/reminders" });
       for (const sub of subs) {
