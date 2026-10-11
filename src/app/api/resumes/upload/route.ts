@@ -1,6 +1,7 @@
 import mammoth from "mammoth";
 import { extractText, getDocumentProxy } from "unpdf";
 import { auth } from "@/auth";
+import { LIMITS, rateLimit } from "@/lib/rate-limit";
 import { stringifyJson } from "@/lib/json";
 import { prisma } from "@/lib/prisma";
 import { parseResumeText } from "@/lib/resume/parse";
@@ -13,6 +14,8 @@ export const maxDuration = 30;
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) return Response.json({ error: "Sign in required" }, { status: 401 });
+  const limit = await rateLimit(`upload:${session.user.id}`, LIMITS.api.max, LIMITS.api.windowMs);
+  if (!limit.ok) return Response.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) return Response.json({ error: "Choose a PDF, DOCX, or TXT file." }, { status: 400 });

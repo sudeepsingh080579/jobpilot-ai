@@ -2,7 +2,21 @@ import type { NextAuthConfig } from "next-auth";
 import { NextResponse } from "next/server";
 import { secureCookiesEnabled } from "@/lib/deploy";
 
-const publicPaths = new Set(["/", "/login", "/register", "/offline"]);
+const publicPaths = new Set([
+  "/",
+  "/login",
+  "/register",
+  "/offline",
+  "/pricing",
+  "/terms",
+  "/privacy",
+  "/refund",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/opengraph-image",
+  "/twitter-image",
+]);
 
 export const authConfig = {
   trustHost: true,
