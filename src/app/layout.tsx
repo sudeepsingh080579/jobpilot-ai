@@ -2,11 +2,24 @@ import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import { brand } from "@/lib/brand";
 import { RegisterSw } from "@/components/pwa";
+import { CookieNotice } from "@/components/cookie-notice";
+import { appUrl } from "@/lib/billing/config";
 import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl()),
+  keywords: ["job search", "AI resume", "ATS resume", "cover letter", "interview practice", "salary negotiation", "job tracker"],
+  openGraph: {
+    type: "website",
+    siteName: brand.name,
+    title: `${brand.name}: ${brand.tagline}`,
+    description: brand.description,
+    url: "/",
+  },
+  twitter: { card: "summary_large_image", title: brand.name, description: brand.description },
+  alternates: { canonical: "/" },
   title: { default: brand.name, template: `%s · ${brand.shortName}` },
   description: brand.description,
   applicationName: brand.name,
@@ -33,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full antialiased">
         <RegisterSw />
         {children}
+        <CookieNotice />
       </body>
     </html>
   );
