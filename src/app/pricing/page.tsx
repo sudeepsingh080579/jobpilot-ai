@@ -7,7 +7,7 @@ import { SiteFooter, SiteHeader } from "@/components/marketing/site-chrome";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Pro Monthly at $40 a month or Pro Annual at $400 a year. Start with a 7-day free trial, no card needed.",
+  description: "Pro at ₹2,000 a month + 18% GST (₹2,360 total). Start with a 7-day free trial, no card needed.",
 };
 
 export default async function PricingPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {

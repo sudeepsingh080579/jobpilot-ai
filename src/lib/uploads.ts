@@ -20,7 +20,10 @@ export async function storeResumeFile(input: {
   bytes: Buffer;
   contentType: string;
 }): Promise<{ fileUrl: string; fileData: Buffer | null }> {
-  if (!usesBlobStore(process.env.BLOB_READ_WRITE_TOKEN)) {
+  // Resumes are private (spec §5/§21): Postgres by default, served only through
+  // the authenticated /api/resumes/[id]/file route. Blob (unlisted public URL)
+  // requires an explicit RESUME_STORAGE=blob opt-in.
+  if (process.env.RESUME_STORAGE !== "blob" || !usesBlobStore(process.env.BLOB_READ_WRITE_TOKEN)) {
     return { fileUrl: "", fileData: input.bytes };
   }
   const { put } = await import("@vercel/blob");

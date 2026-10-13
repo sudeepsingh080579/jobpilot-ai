@@ -13,9 +13,9 @@ const active = (over: Partial<{ status: string; plan: string; currentPeriodEnd: 
 });
 
 describe("entitlements", () => {
-  it("prices are $40/month and $400/year", () => {
-    expect(PRICES.pro_monthly).toMatchObject({ amountUsd: 40, interval: "month" });
-    expect(PRICES.pro_annual).toMatchObject({ amountUsd: 400, interval: "year" });
+  it("price is ₹2,000/month (paise), annual not sold", () => {
+    expect(PRICES.pro_monthly).toMatchObject({ amountPaise: 200000, currency: "INR", interval: "month", sold: true });
+    expect(PRICES.pro_annual.sold).toBe(false);
   });
 
   it("new accounts are on a 7-day trial with Pro features", () => {
@@ -25,12 +25,13 @@ describe("entitlements", () => {
     expect(hasFeature(ent, "pitch_deck")).toBe(true);
   });
 
-  it("expired trial falls back to Free, not lockout", () => {
+  it("expired trial keeps data access but no AI/premium features until purchase", () => {
     const ent = entitlementFor({ trialEndsAt: days(-1), subscription: null }, now);
     expect(ent.plan).toBe("free");
     expect(ent.aiPerMonth).toBe(LIMITS.free.aiPerMonth);
     expect(hasFeature(ent, "pitch_deck")).toBe(false);
-    expect(hasFeature(ent, "cover_letter")).toBe(true);
+    expect(hasFeature(ent, "cover_letter")).toBe(false);
+    expect(ent.aiPerMonth).toBe(0);
   });
 
   it("active, trialing and past_due subscriptions grant Pro", () => {
@@ -57,8 +58,8 @@ describe("entitlements", () => {
   it("checkAi blocks Pro-only tasks on Free and enforces the monthly quota", () => {
     const free = entitlementFor({ trialEndsAt: null, subscription: null }, now);
     expect(checkAi(free, "pitch_deck", 0)).toMatchObject({ ok: false, reason: "feature" });
-    expect(checkAi(free, "cover_letter", 0)).toEqual({ ok: true });
-    expect(checkAi(free, "cover_letter", LIMITS.free.aiPerMonth)).toMatchObject({ ok: false, reason: "quota" });
+    expect(checkAi(free, "cover_letter", 0)).toMatchObject({ ok: false, reason: "feature" });
+    expect(checkAi(free, "chat", 0)).toMatchObject({ ok: false, reason: "feature" });
     const pro = entitlementFor({ trialEndsAt: null, subscription: active() }, now);
     expect(checkAi(pro, "pitch_deck", LIMITS.pro.aiPerMonth - 1)).toEqual({ ok: true });
     expect(checkAi(pro, "chat", LIMITS.pro.aiPerMonth)).toMatchObject({ ok: false, reason: "quota" });

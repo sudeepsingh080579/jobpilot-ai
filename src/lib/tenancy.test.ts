@@ -16,6 +16,8 @@ const REVIEWED: { file: string; pattern: RegExp; why: string }[] = [
   { file: "src/server/session.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ id: session\.user\.id \} \}\)/, why: "the session's own user" },
   { file: "src/app/api/account/export/route.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ id: session\.user\.id \}/, why: "the session's own user" },
   { file: "src/app/api/stripe/checkout/route.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ id: session\.user\.id \}/, why: "the session's own user" },
+  { file: "src/app/api/billing/checkout/route.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ id: session\.user\.id \}/, why: "the session's own user" },
+  { file: "src/server/billing-store.ts", pattern: /prisma\.(billingEventLog|billingAccount|user)\./, why: "verified webhook processing keyed by provider ids; user resolved from signed payload" },
   { file: "src/server/stripe-store.ts", pattern: /prisma\.(stripeEvent|subscription)\./, why: "webhook writes, keyed by verified Stripe ids" },
   { file: "src/server/privacy-actions.ts", pattern: /prisma\.user\.delete\(\{ where: \{ id: user\.id \} \}\)/, why: "deletes the signed-in user" },
   { file: "", pattern: /prisma\.user\.update\(\{ where: \{ id: user\.id \}/, why: "the signed-in user" },

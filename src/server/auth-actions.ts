@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { startTrial } from "@/server/billing-store";
 import { z } from "zod";
 import { auth, signIn, signOut } from "@/auth";
 import { TRIAL_DAYS } from "@/lib/billing/plans";
@@ -64,8 +65,9 @@ export async function registerAction(formData: FormData) {
       templates: { create: DEFAULT_TEMPLATES },
     },
   });
+  await startTrial(user.id).catch((error) => console.error("trial start failed", error));
   await sendVerificationEmail(user).catch((error) => console.error("verification email failed", error));
-  await signIn("credentials", { email, password: parsed.data.password, redirectTo: "/dashboard" });
+  await signIn("credentials", { email, password: parsed.data.password, redirectTo: "/onboarding" });
 }
 
 export async function resendVerificationAction() {

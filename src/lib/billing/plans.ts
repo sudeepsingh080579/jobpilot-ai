@@ -4,10 +4,13 @@ import type { AiTask } from "@/lib/ai/types";
  * Plans and entitlements. Pure functions only, so they can be unit tested and
  * shared by server actions, API routes and pages.
  *
- * Model: every new account gets a 7-day Pro trial with no card. When the
- * trial ends without a subscription, the account drops to the Free tier
- * (tracker, resumes and a small AI allowance) instead of being locked out.
+ * Model (spec §3): every new account gets a 7-day trial with no card. When
+ * the trial ends without a subscription the account is "free" in name only:
+ * the user keeps read access to their own data, settings, export and
+ * deletion, but AI and premium features need an explicit ₹2,000/month
+ * (+GST) purchase. Nothing is ever charged automatically.
  */
+import { PLAN_PRICE_PAISE } from "@/lib/billing/pricing";
 
 export type PlanId = "free" | "trial" | "pro";
 export type PaidPlan = "pro_monthly" | "pro_annual";
@@ -15,13 +18,14 @@ export type Feature = "pitch_deck" | "interview" | "negotiation" | "linkedin" | 
 
 export const TRIAL_DAYS = 7;
 
-export const PRICES: Record<PaidPlan, { label: string; amountUsd: number; interval: "month" | "year"; note: string }> = {
-  pro_monthly: { label: "Pro Monthly", amountUsd: 40, interval: "month", note: "Billed monthly. Cancel anytime." },
-  pro_annual: { label: "Pro Annual", amountUsd: 400, interval: "year", note: "Billed yearly. About 2 months free." },
+/** pro_annual is legacy (earlier USD Stripe plan) and is not sold any more. */
+export const PRICES: Record<PaidPlan, { label: string; amountPaise: number; currency: "INR"; interval: "month" | "year"; note: string; sold: boolean }> = {
+  pro_monthly: { label: "Pro Monthly", amountPaise: PLAN_PRICE_PAISE, currency: "INR", interval: "month", note: "Billed monthly + GST. Cancel any time.", sold: true },
+  pro_annual: { label: "Pro Annual (legacy)", amountPaise: 0, currency: "INR", interval: "year", note: "No longer offered.", sold: false },
 };
 
 export const LIMITS: Record<PlanId, { aiPerMonth: number; features: readonly Feature[] }> = {
-  free: { aiPerMonth: 15, features: ["strategy", "cover_letter"] },
+  free: { aiPerMonth: 0, features: [] },
   trial: { aiPerMonth: 100, features: ["strategy", "cover_letter", "outreach", "linkedin", "interview", "negotiation", "pitch_deck"] },
   pro: { aiPerMonth: 600, features: ["strategy", "cover_letter", "outreach", "linkedin", "interview", "negotiation", "pitch_deck"] },
 };
@@ -117,13 +121,20 @@ export function usagePeriod(now = new Date()) {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+export const TRIAL_OVER = "Your 7-day free trial has ended. Subscribe for ₹2,000 a month (+18% GST) to keep using AI features. Your data stays yours either way.";
+
 export type AiDecision = { ok: true } | { ok: false; reason: "feature" | "quota"; message: string };
 
 export function checkAi(ent: Entitlement, task: AiTask, used: number): AiDecision {
   const feature = TASK_FEATURE[task];
   if (feature && !hasFeature(ent, feature)) {
-    return { ok: false, reason: "feature", message: `${FEATURE_LABEL[feature]} are part of Pro. Upgrade on the Pricing page to unlock them.` };
+    return {
+      ok: false,
+      reason: "feature",
+      message: ent.plan === "free" ? TRIAL_OVER : `${FEATURE_LABEL[feature]} are part of Pro. Upgrade on the Pricing page to unlock them.`,
+    };
   }
+  if (ent.plan === "free") return { ok: false, reason: "feature", message: TRIAL_OVER };
   if (used >= ent.aiPerMonth) {
     return {
       ok: false,

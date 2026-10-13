@@ -1,3 +1,4 @@
+import { formatInr, gstRateBps, priceBreakdown } from "@/lib/billing/pricing";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shell";
@@ -22,6 +23,7 @@ function fmt(date: Date | null) {
 }
 
 export default async function BillingPage({ searchParams }: { searchParams: Promise<{ checkout?: string; error?: string }> }) {
+  const price = priceBreakdown(undefined, gstRateBps());
   const query = await searchParams;
   const user = await requireUser();
   const [ent, used, sub] = await Promise.all([getEntitlement(user), aiUsed(user.id), prisma.subscription.findUnique({ where: { userId: user.id } })]);
@@ -62,7 +64,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       <div className="flex flex-wrap gap-3">
         {ent.plan !== "pro" ? (
           <Link href="/pricing" className="inline-flex h-12 items-center rounded-full bg-sun px-6 font-bold text-ink" data-testid="upgrade-link">
-            Upgrade · ${PRICES.pro_monthly.amountUsd}/mo or ${PRICES.pro_annual.amountUsd}/yr
+            Upgrade · {formatInr(price.basePaise)}/month + GST ({formatInr(price.totalPaise)} total)
           </Link>
         ) : null}
         {sub && config.secretKey ? (
