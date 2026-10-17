@@ -21,7 +21,7 @@ const ERRORS: Record<string, string> = {
 };
 
 function fmt(date: Date | null) {
-  return date ? date.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }) : "";
+  return date ? date.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Kolkata" }) : "";
 }
 
 export default async function BillingPage({ searchParams }: { searchParams: Promise<{ checkout?: string; error?: string }> }) {
