@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Check } from "lucide-react";
 
-type Props = { signedIn: boolean; configured: boolean; currentPlan?: string };
+type Props = { signedIn: boolean; configured: boolean; currentPlan?: string; checkoutHref?: string };
 
 const PRO_FEATURES = [
   "600 AI actions a month",
@@ -17,7 +17,7 @@ const PRO_FEATURES = [
 
 const FREE_FEATURES = ["Job tracker board", "Resume editor and score", "Read, export or delete your data", "No AI features after the trial"];
 
-export function PricingTable({ signedIn, configured, currentPlan }: Props) {
+export function PricingTable({ signedIn, configured, currentPlan, checkoutHref }: Props) {
   const plan = "pro_monthly"; // India plan is monthly only (spec §3)
   const isCurrent = currentPlan === plan;
 
@@ -58,6 +58,10 @@ export function PricingTable({ signedIn, configured, currentPlan }: Props) {
             </Link>
           ) : !configured ? (
             <p className="mt-6 rounded-2xl bg-white/15 px-4 py-3 text-sm" data-testid="payments-not-configured">Payments are not configured on this server yet.</p>
+          ) : checkoutHref ? (
+            <Link href={checkoutHref} data-testid="checkout" className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-sun font-bold text-ink">
+              {isCurrent ? "Extend Pro by 30 days (UPI)" : "Pay ₹1,999 with UPI"}
+            </Link>
           ) : isCurrent ? (
             <p className="mt-6 rounded-2xl bg-white/15 px-4 py-3 text-sm font-semibold">This is your current plan.</p>
           ) : (

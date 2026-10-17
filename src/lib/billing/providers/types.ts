@@ -1,13 +1,14 @@
 import type { BillingEvent } from "@/lib/billing/state-machine";
 
-export type ProviderId = "razorpay" | "stripe";
+export type ProviderId = "razorpay" | "stripe" | "upi_manual";
 
 export type CheckoutRequest = { userId: string; email: string; name: string; plan: "pro_monthly" };
 
 /** What the browser needs to complete payment. Razorpay opens its Checkout.js modal; Stripe redirects. */
 export type CheckoutSession =
   | { kind: "razorpay_modal"; keyId: string; subscriptionId: string; customerId?: string }
-  | { kind: "redirect"; url: string; customerId: string };
+  | { kind: "redirect"; url: string; customerId: string }
+  | { kind: "upi_page"; url: string };
 
 /** A verified webhook turned into our vocabulary. */
 export type NormalizedEvent = {

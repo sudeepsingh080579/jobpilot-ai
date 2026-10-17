@@ -1,4 +1,5 @@
 import { createRazorpayProvider } from "@/lib/billing/providers/razorpay";
+import { createUpiManualProvider } from "@/lib/billing/providers/upi-manual";
 import { createStripeProvider } from "@/lib/billing/providers/stripe";
 import type { BillingProvider, ProviderId } from "@/lib/billing/providers/types";
 
@@ -10,11 +11,13 @@ type Env = Record<string, string | undefined>;
  * /api/stripe/*; checkout/webhook wiring for both is completed in phase 5.
  */
 export function activeProviderId(env: Env = process.env): ProviderId {
-  return env.BILLING_PROVIDER?.trim().toLowerCase() === "stripe" ? "stripe" : "razorpay";
+  const v = env.BILLING_PROVIDER?.trim().toLowerCase();
+  return v === "stripe" ? "stripe" : v === "upi_manual" ? "upi_manual" : "razorpay";
 }
 
 export function getBillingProvider(env: Env = process.env): BillingProvider {
-  return activeProviderId(env) === "stripe" ? createStripeProvider(env) : createRazorpayProvider(env);
+  const id = activeProviderId(env);
+  return id === "stripe" ? createStripeProvider(env) : id === "upi_manual" ? createUpiManualProvider(env) : createRazorpayProvider(env);
 }
 
 export type { BillingProvider, ProviderId } from "@/lib/billing/providers/types";

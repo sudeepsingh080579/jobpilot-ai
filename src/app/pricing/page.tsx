@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { auth } from "@/auth";
-import { stripeConfig } from "@/lib/billing/config";
-import { prisma } from "@/lib/prisma";
+import { activeProviderId, getBillingProvider } from "@/lib/billing/providers";
+import { actionUser } from "@/server/session";
+import { getEntitlement } from "@/server/billing";
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { SiteFooter, SiteHeader } from "@/components/marketing/site-chrome";
 
@@ -13,8 +14,9 @@ export const metadata: Metadata = {
 export default async function PricingPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
   const query = await searchParams;
   const session = await auth();
-  const sub = session?.user?.id ? await prisma.subscription.findUnique({ where: { userId: session.user.id } }) : null;
-  const active = sub && ["active", "trialing", "past_due"].includes(sub.status) ? sub.plan : undefined;
+  const user = session?.user?.id ? await actionUser() : null;
+  const ent = user ? await getEntitlement(user) : null;
+  const active = ent?.plan === "pro" ? (ent.paidPlan ?? "pro_monthly") : undefined;
   return (
     <div className="min-h-screen bg-canvas">
       <SiteHeader signedIn={Boolean(session?.user)} />
@@ -23,7 +25,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         <p className="mx-auto mt-3 max-w-lg text-center text-lg text-muted">Try every Pro feature free for 7 days. No card needed.</p>
         {query.checkout === "cancelled" ? <p className="mx-auto mt-4 w-fit rounded-full bg-sun-soft px-4 py-2 text-sm">Checkout cancelled. Nothing was charged.</p> : null}
         <div className="mt-10">
-          <PricingTable signedIn={Boolean(session?.user)} configured={stripeConfig().configured} currentPlan={active || undefined} />
+          <PricingTable signedIn={Boolean(session?.user)} configured={getBillingProvider().configured()} checkoutHref={activeProviderId() === "upi_manual" ? "/settings/billing/upi" : undefined} currentPlan={active || undefined} />
         </div>
         <section className="mt-16 grid gap-6 md:grid-cols-2">
           {[

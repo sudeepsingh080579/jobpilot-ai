@@ -1,6 +1,7 @@
 import { completeJson } from "@/lib/ai";
 import type { AiResult, AiTask } from "@/lib/ai/types";
-import { checkAi, entitlementFor, usagePeriod, type Entitlement } from "@/lib/billing/plans";
+import { accessFor, type SubState } from "@/lib/billing/state-machine";
+import { LIMITS as PLAN_LIMITS, checkAi, entitlementFor, usagePeriod, type Entitlement } from "@/lib/billing/plans";
 import { prisma } from "@/lib/prisma";
 import { LIMITS, rateLimit } from "@/lib/rate-limit";
 import { fail, type Result } from "@/server/result";
@@ -8,8 +9,26 @@ import { fail, type Result } from "@/server/result";
 type BillingUser = { id: string; trialEndsAt: Date | null };
 
 export async function getEntitlement(user: BillingUser): Promise<Entitlement> {
-  const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
-  return entitlementFor({ trialEndsAt: user.trialEndsAt, subscription });
+  const [subscription, account] = await Promise.all([
+    prisma.subscription.findUnique({ where: { userId: user.id } }),
+    prisma.billingAccount.findUnique({ where: { userId: user.id } }),
+  ]);
+  const legacy = entitlementFor({ trialEndsAt: user.trialEndsAt, subscription });
+  if (legacy.plan === "pro" || !account) return legacy;
+  // Provider-agnostic state machine (Razorpay / manual UPI) also grants Pro.
+  const access = accessFor({ state: account.state as SubState, trialEndsAt: account.trialEndsAt, periodEnd: account.periodEnd, appliedPayments: account.appliedPayments });
+  if (access.paid && access.allowed) {
+    return {
+      plan: "pro",
+      paidPlan: "pro_monthly",
+      ...PLAN_LIMITS.pro,
+      trialDaysLeft: 0,
+      status: account.state,
+      cancelAtPeriodEnd: account.state === "cancel_scheduled",
+      currentPeriodEnd: account.periodEnd,
+    };
+  }
+  return legacy;
 }
 
 export async function aiUsed(userId: string) {

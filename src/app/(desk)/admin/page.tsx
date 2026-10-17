@@ -33,6 +33,7 @@ export default async function AdminPage() {
 
   return (
     <div data-testid="admin-page">
+      <a href="/admin/payments" className="mb-3 inline-block font-semibold underline" data-testid="admin-payments-link">Review UPI payments →</a>
       <PageHeader eyebrow="Admin" title="Business overview" lede="Read-only. Manage refunds and subscriptions in the Stripe Dashboard." />
       <div className="grid gap-3 sm:grid-cols-4">
         {[

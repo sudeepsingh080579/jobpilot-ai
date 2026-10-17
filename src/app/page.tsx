@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BriefcaseBusiness, FileText, MessageCircle, Mic, Send, Target } from "lucide-react";
 import { auth } from "@/auth";
-import { stripeConfig } from "@/lib/billing/config";
+import { activeProviderId, getBillingProvider } from "@/lib/billing/providers";
 import { PricingTable } from "@/components/marketing/pricing-table";
 import { SiteFooter, SiteHeader } from "@/components/marketing/site-chrome";
 
@@ -75,7 +75,7 @@ export default async function HomePage() {
 
         <section id="pricing" className="mx-auto mt-16 max-w-4xl px-5">
           <h2 className="mb-8 text-center text-3xl font-bold">Pricing</h2>
-          <PricingTable signedIn={false} configured={stripeConfig().configured} />
+          <PricingTable signedIn={false} configured={getBillingProvider().configured()} checkoutHref={activeProviderId() === "upi_manual" ? "/settings/billing/upi" : undefined} />
         </section>
       </main>
       <SiteFooter />

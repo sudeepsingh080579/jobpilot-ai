@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shell";
 import { stripeConfig } from "@/lib/billing/config";
+import { activeProviderId, getBillingProvider } from "@/lib/billing/providers";
+import { cancelPlanAction } from "@/server/upi-actions";
 import { LIMITS, PRICES } from "@/lib/billing/plans";
 import { prisma } from "@/lib/prisma";
 import { aiUsed, getEntitlement } from "@/server/billing";
@@ -28,18 +30,29 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const user = await requireUser();
   const [ent, used, sub] = await Promise.all([getEntitlement(user), aiUsed(user.id), prisma.subscription.findUnique({ where: { userId: user.id } })]);
   const config = stripeConfig();
+  const providerReady = getBillingProvider().configured();
+  const upi = activeProviderId() === "upi_manual";
+  const [pendingUpi, account] = await Promise.all([
+    prisma.upiPayment.findFirst({ where: { userId: user.id, status: "pending" }, orderBy: { createdAt: "desc" } }),
+    prisma.billingAccount.findUnique({ where: { userId: user.id } }),
+  ]);
   const pct = Math.min(100, Math.round((used / ent.aiPerMonth) * 100));
 
   return (
     <div className="max-w-2xl space-y-4" data-testid="billing-page">
       <PageHeader eyebrow="Account" title="Plan and billing" />
-      {!config.configured ? (
+      {!providerReady ? (
         <p className="rounded-2xl border-2 border-sun bg-sun-soft px-4 py-3 text-sm font-semibold" data-testid="payments-not-configured">
           Payments are not configured on this server yet. Upgrades will open here once checkout is enabled.
         </p>
       ) : null}
       {query.checkout === "success" ? (
         <p className="rounded-2xl bg-teal-soft px-4 py-3 text-sm font-semibold">Thanks! Your payment went through. Pro turns on as soon as the payment provider confirms it, usually within a few seconds.</p>
+      ) : null}
+      {pendingUpi ? (
+        <p className="rounded-2xl bg-sun-soft px-4 py-3 text-sm font-semibold" data-testid="upi-pending-status">
+          UPI payment (UTR {pendingUpi.utr}) is pending verification. We usually verify within 24 hours.
+        </p>
       ) : null}
       {query.error && ERRORS[query.error] ? <p className="rounded-2xl bg-coral-soft px-4 py-3 text-sm font-semibold">{ERRORS[query.error]}</p> : null}
 
@@ -51,7 +64,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         <p className="mt-2 text-sm text-white/85">
           {ent.plan === "trial" && `${ent.trialDaysLeft} day${ent.trialDaysLeft === 1 ? "" : "s"} left in your trial. No card on file.`}
           {ent.plan === "pro" && ent.cancelAtPeriodEnd && `Cancels on ${fmt(ent.currentPeriodEnd)}. You keep Pro until then.`}
-          {ent.plan === "pro" && !ent.cancelAtPeriodEnd && ent.currentPeriodEnd && `Renews on ${fmt(ent.currentPeriodEnd)}.`}
+          {ent.plan === "pro" && !ent.cancelAtPeriodEnd && ent.currentPeriodEnd && (account?.provider === "upi_manual" ? `Pro until ${fmt(ent.currentPeriodEnd)}. UPI plans do not renew automatically.` : `Renews on ${fmt(ent.currentPeriodEnd)}.`)}
           {ent.plan === "pro" && ent.status === "past_due" && " Your last payment failed. Update your card to keep Pro."}
           {ent.plan === "free" && "Upgrade to unlock every tool and a bigger AI allowance."}
         </p>
@@ -62,7 +75,17 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       </section>
 
       <div className="flex flex-wrap gap-3">
-        {ent.plan !== "pro" ? (
+        {upi && providerReady && !pendingUpi ? (
+          <Link href="/settings/billing/upi" className="inline-flex h-12 items-center rounded-full bg-sun px-6 font-bold text-ink" data-testid="upi-pay-link">
+            {ent.plan === "pro" ? "Extend 30 days with UPI" : `Pay ${formatInr(price.totalPaise)} with UPI`}
+          </Link>
+        ) : null}
+        {account?.state === "active" ? (
+          <form action={cancelPlanAction}>
+            <button className="h-12 rounded-full border-2 border-coral px-6 font-bold" type="submit" data-testid="cancel-plan">Cancel (no renewal)</button>
+          </form>
+        ) : null}
+        {ent.plan !== "pro" && !upi ? (
           <Link href="/pricing" className="inline-flex h-12 items-center rounded-full bg-sun px-6 font-bold text-ink" data-testid="upgrade-link">
             Upgrade · {formatInr(price.totalPaise)}/month incl. {price.gstRateBps / 100}% GST
           </Link>
