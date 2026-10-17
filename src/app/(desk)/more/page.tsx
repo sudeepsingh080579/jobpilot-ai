@@ -29,6 +29,7 @@ const tools = [
   { href: "/interview", label: "Interview", detail: "Questions and a score", icon: Mic, tint: "bg-violet text-white" },
   { href: "/letters", label: "Letters", detail: "Cover notes you can edit", icon: Mail, tint: "bg-indigo text-white" },
   { href: "/resumes", label: "Resumes", detail: "Templates and scores", icon: FileText, tint: "bg-sun text-ink" },
+  { href: "/hunt", label: "Job Hunt Agent", detail: "Real roles from company boards", icon: Search, tint: "bg-indigo text-white" },
   { href: "/search", label: "Search", detail: "Sample market and paste-in", icon: Search, tint: "bg-teal text-white" },
   { href: "/pitch", label: "Pitch decks", detail: "Slides you can print", icon: Presentation, tint: "bg-violet text-white" },
   { href: "/negotiate", label: "Full negotiation", detail: "Script and role-play", icon: Handshake, tint: "bg-coral text-white" },

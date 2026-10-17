@@ -1,0 +1,494 @@
+[
+{
+"name": "Cockroach Labs",
+"ats": "greenhouse",
+"token": "cockroachlabs",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Netlify",
+"ats": "greenhouse",
+"token": "netlify",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Groww",
+"ats": "greenhouse",
+"token": "groww",
+"industry": "Fintech \u00b7 India-founded"
+},
+{
+"name": "slice",
+"ats": "greenhouse",
+"token": "slice",
+"industry": "Fintech \u00b7 India-founded"
+},
+{
+"name": "CircleCI",
+"ats": "greenhouse",
+"token": "circleci",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Squarespace",
+"ats": "greenhouse",
+"token": "squarespace",
+"industry": "SaaS / product"
+},
+{
+"name": "Druva",
+"ats": "greenhouse",
+"token": "druva",
+"industry": "SaaS / product \u00b7 India-founded"
+},
+{
+"name": "N26",
+"ats": "greenhouse",
+"token": "n26",
+"industry": "Fintech"
+},
+{
+"name": "Contentful",
+"ats": "greenhouse",
+"token": "contentful",
+"industry": "SaaS / product"
+},
+{
+"name": "GoCardless",
+"ats": "greenhouse",
+"token": "gocardless",
+"industry": "Fintech"
+},
+{
+"name": "Careem",
+"ats": "greenhouse",
+"token": "careem",
+"industry": "SaaS / product"
+},
+{
+"name": "Discord",
+"ats": "greenhouse",
+"token": "discord",
+"industry": "SaaS / product"
+},
+{
+"name": "LaunchDarkly",
+"ats": "greenhouse",
+"token": "launchdarkly",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Monzo",
+"ats": "greenhouse",
+"token": "monzo",
+"industry": "Fintech"
+},
+{
+"name": "New Relic",
+"ats": "greenhouse",
+"token": "newrelic",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Vercel",
+"ats": "greenhouse",
+"token": "vercel",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Chime",
+"ats": "greenhouse",
+"token": "chime",
+"industry": "Fintech"
+},
+{
+"name": "Grafana Labs",
+"ats": "greenhouse",
+"token": "grafanalabs",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "InMobi",
+"ats": "greenhouse",
+"token": "inmobi",
+"industry": "SaaS / product \u00b7 India-founded"
+},
+{
+"name": "Intercom",
+"ats": "greenhouse",
+"token": "intercom",
+"industry": "SaaS / product"
+},
+{
+"name": "Figma",
+"ats": "greenhouse",
+"token": "figma",
+"industry": "SaaS / product"
+},
+{
+"name": "Asana",
+"ats": "greenhouse",
+"token": "asana",
+"industry": "SaaS / product"
+},
+{
+"name": "Gusto",
+"ats": "greenhouse",
+"token": "gusto",
+"industry": "SaaS / product"
+},
+{
+"name": "Instacart",
+"ats": "greenhouse",
+"token": "instacart",
+"industry": "SaaS / product"
+},
+{
+"name": "Robinhood",
+"ats": "greenhouse",
+"token": "robinhood",
+"industry": "Fintech"
+},
+{
+"name": "Lyft",
+"ats": "greenhouse",
+"token": "lyft",
+"industry": "SaaS / product"
+},
+{
+"name": "Rubrik",
+"ats": "greenhouse",
+"token": "rubrik",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Fivetran",
+"ats": "greenhouse",
+"token": "fivetran",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Pinterest",
+"ats": "greenhouse",
+"token": "pinterest",
+"industry": "SaaS / product"
+},
+{
+"name": "Adyen",
+"ats": "greenhouse",
+"token": "adyen",
+"industry": "Fintech"
+},
+{
+"name": "Dropbox",
+"ats": "greenhouse",
+"token": "dropbox",
+"industry": "SaaS / product"
+},
+{
+"name": "Brex",
+"ats": "greenhouse",
+"token": "brex",
+"industry": "Fintech"
+},
+{
+"name": "Affirm",
+"ats": "greenhouse",
+"token": "affirm",
+"industry": "Fintech"
+},
+{
+"name": "Twilio",
+"ats": "greenhouse",
+"token": "twilio",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "SumUp",
+"ats": "greenhouse",
+"token": "sumup",
+"industry": "Fintech"
+},
+{
+"name": "Toast",
+"ats": "greenhouse",
+"token": "toast",
+"industry": "SaaS / product"
+},
+{
+"name": "Airbnb",
+"ats": "greenhouse",
+"token": "airbnb",
+"industry": "SaaS / product"
+},
+{
+"name": "Reddit",
+"ats": "greenhouse",
+"token": "reddit",
+"industry": "SaaS / product"
+},
+{
+"name": "GitLab",
+"ats": "greenhouse",
+"token": "gitlab",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Coinbase",
+"ats": "greenhouse",
+"token": "coinbase",
+"industry": "Fintech"
+},
+{
+"name": "HelloFresh",
+"ats": "greenhouse",
+"token": "hellofresh",
+"industry": "SaaS / product"
+},
+{
+"name": "Samsara",
+"ats": "greenhouse",
+"token": "samsara",
+"industry": "SaaS / product"
+},
+{
+"name": "Celonis",
+"ats": "greenhouse",
+"token": "celonis",
+"industry": "SaaS / product"
+},
+{
+"name": "Cloudflare",
+"ats": "greenhouse",
+"token": "cloudflare",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Agoda",
+"ats": "greenhouse",
+"token": "agoda",
+"industry": "SaaS / product"
+},
+{
+"name": "Stripe",
+"ats": "greenhouse",
+"token": "stripe",
+"industry": "SaaS / product"
+},
+{
+"name": "PostHog",
+"ats": "ashby",
+"token": "posthog",
+"industry": "SaaS / product"
+},
+{
+"name": "Elastic",
+"ats": "greenhouse",
+"token": "elastic",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Okta",
+"ats": "greenhouse",
+"token": "okta",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Zapier",
+"ats": "ashby",
+"token": "zapier",
+"industry": "SaaS / product"
+},
+{
+"name": "Zscaler",
+"ats": "greenhouse",
+"token": "zscaler",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Deliveroo",
+"ats": "greenhouse",
+"token": "deliveroo",
+"industry": "SaaS / product"
+},
+{
+"name": "Linear",
+"ats": "ashby",
+"token": "linear",
+"industry": "SaaS / product"
+},
+{
+"name": "Datadog",
+"ats": "greenhouse",
+"token": "datadog",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Databricks",
+"ats": "greenhouse",
+"token": "databricks",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "MongoDB",
+"ats": "greenhouse",
+"token": "mongodb",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Sardine",
+"ats": "ashby",
+"token": "sardine",
+"industry": "Fintech"
+},
+{
+"name": "Replit",
+"ats": "ashby",
+"token": "replit",
+"industry": "SaaS / product"
+},
+{
+"name": "Cursor (Anysphere)",
+"ats": "ashby",
+"token": "cursor",
+"industry": "SaaS / product"
+},
+{
+"name": "PlanetScale",
+"ats": "greenhouse",
+"token": "planetscale",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "Vanta",
+"ats": "ashby",
+"token": "vanta",
+"industry": "SaaS / product"
+},
+{
+"name": "PagerDuty",
+"ats": "greenhouse",
+"token": "pagerduty",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "GetYourGuide",
+"ats": "greenhouse",
+"token": "getyourguide",
+"industry": "SaaS / product"
+},
+{
+"name": "Plaid",
+"ats": "ashby",
+"token": "plaid",
+"industry": "Fintech"
+},
+{
+"name": "Ramp",
+"ats": "ashby",
+"token": "ramp",
+"industry": "Fintech"
+},
+{
+"name": "Notion",
+"ats": "ashby",
+"token": "notion",
+"industry": "SaaS / product"
+},
+{
+"name": "Spotify",
+"ats": "lever",
+"token": "spotify",
+"industry": "SaaS / product"
+},
+{
+"name": "CRED",
+"ats": "lever",
+"token": "cred",
+"industry": "Fintech \u00b7 India-founded"
+},
+{
+"name": "Wise",
+"ats": "smartrecruiters",
+"token": "Wise",
+"industry": "Fintech"
+},
+{
+"name": "Binance",
+"ats": "lever",
+"token": "binance",
+"industry": "Fintech"
+},
+{
+"name": "ServiceNow",
+"ats": "smartrecruiters",
+"token": "ServiceNow",
+"industry": "Cloud / infrastructure"
+},
+{
+"name": "OpenAI",
+"ats": "ashby",
+"token": "openai",
+"industry": "SaaS / product"
+},
+{
+"name": "Palantir",
+"ats": "lever",
+"token": "palantir",
+"industry": "SaaS / product"
+},
+{
+"name": "Paytm",
+"ats": "lever",
+"token": "paytm",
+"industry": "Fintech \u00b7 India-founded"
+},
+{
+"name": "Outreach",
+"ats": "lever",
+"token": "outreach",
+"industry": "SaaS / product"
+},
+{
+"name": "Freshworks",
+"ats": "smartrecruiters",
+"token": "Freshworks",
+"industry": "SaaS / product \u00b7 India-founded"
+},
+{
+"name": "Experian",
+"ats": "smartrecruiters",
+"token": "Experian",
+"industry": "Fintech"
+},
+{
+"name": "NielsenIQ",
+"ats": "smartrecruiters",
+"token": "NielsenIQ",
+"industry": "SaaS / product"
+},
+{
+"name": "FamPay",
+"ats": "lever",
+"token": "fampay",
+"industry": "Fintech \u00b7 India-founded"
+},
+{
+"name": "Meesho",
+"ats": "lever",
+"token": "meesho",
+"industry": "SaaS / product \u00b7 India-founded"
+},
+{
+"name": "Canva",
+"ats": "smartrecruiters",
+"token": "Canva",
+"industry": "SaaS / product"
+},
+{
+"name": "Zeta",
+"ats": "lever",
+"token": "zeta",
+"industry": "Fintech \u00b7 India-founded"
+}
+]

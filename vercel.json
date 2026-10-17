@@ -1,3 +1,4 @@
 {
-  "buildCommand": "prisma generate && prisma migrate deploy && node scripts/seed-if-enabled.mjs && next build"
+  "buildCommand": "prisma generate && prisma migrate deploy && node scripts/seed-if-enabled.mjs && next build",
+  "crons": [{ "path": "/api/cron/job-hunt", "schedule": "30 2 * * *" }]
 }

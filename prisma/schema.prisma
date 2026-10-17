@@ -59,6 +59,11 @@ model User {
   billing               BillingAccount?
   consents              ConsentRecord[]
   upiPayments           UpiPayment[]
+  huntCompanies         HuntCompany[]
+  huntSettings          HuntSettings?
+  huntRuns              HuntRun[]
+  huntJobs              HuntJob[]
+  savedAnswers          SavedAnswer[]
   onboardingStep        Int                  @default(0)
   onboardingCompletedAt DateTime?
 }
@@ -546,4 +551,100 @@ model AdminNotification {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/// Job Hunt Agent: employers whose public ATS boards are polled.
+model HuntCompany {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  /// greenhouse | lever | ashby | smartrecruiters
+  ats           String
+  boardToken    String
+  industry      String    @default("")
+  /// seed | user | csv | suggestion
+  source        String    @default("user")
+  enabled       Boolean   @default(true)
+  lastFetchedAt DateTime?
+  lastStatus    String    @default("")
+  createdAt     DateTime  @default(now())
+
+  @@unique([userId, ats, boardToken])
+  @@index([userId])
+}
+
+model HuntSettings {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threshold              Int      @default(70)
+  allowedCountries       String[] @default(["India", "United Arab Emirates", "United Kingdom", "Germany", "Netherlands"])
+  allowUsWithSponsorship Boolean  @default(true)
+  needsSponsorship       Boolean  @default(false)
+  homeCountry            String   @default("India")
+  companiesPerRun        Int      @default(25)
+  autoRun                Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model HuntRun {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trigger    String    @default("manual")
+  status     String    @default("running")
+  companies  Int       @default(0)
+  fetched    Int       @default(0)
+  relevant   Int       @default(0)
+  fresh      Int       @default(0)
+  queued     Int       @default(0)
+  skipped    Int       @default(0)
+  errors     String    @default("[]")
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  @@index([userId, startedAt])
+}
+
+/// Every reviewed posting (dedup key = hash of ats|board|externalId|url). Never resurfaced.
+model HuntJob {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key         String
+  runId       String?
+  company     String
+  ats         String
+  externalId  String
+  title       String
+  location    String    @default("")
+  country     String    @default("")
+  url         String
+  score       Int       @default(0)
+  scoreDetail String    @default("{}")
+  /// queued | skipped | applied | dismissed
+  decision    String
+  skipReason  String    @default("")
+  tailored    String    @default("")
+  answers     String    @default("[]")
+  needsInput  String[]
+  appliedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, key])
+  @@index([userId, decision])
+}
+
+/// Saved answers bank used to prefill applications.
+model SavedAnswer {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

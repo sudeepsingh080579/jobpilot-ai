@@ -20,7 +20,7 @@ const links = [
 
 function zone(pathname: string) {
   if (pathname === "/dashboard" || pathname.startsWith("/journey")) return "home";
-  if (pathname.startsWith("/tracker") || pathname.startsWith("/search")) return "jobs";
+  if (pathname.startsWith("/tracker") || pathname.startsWith("/search") || pathname.startsWith("/hunt")) return "jobs";
   if (
     pathname.startsWith("/more") ||
     pathname.startsWith("/strategy") ||
