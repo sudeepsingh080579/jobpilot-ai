@@ -16,8 +16,8 @@ export default async function UpiCheckoutPage() {
   const user = await requireUser();
   const cfg = upiConfig();
   const price = priceBreakdown(undefined, gstRateBps());
-  const [pending, ent] = await Promise.all([
-    prisma.upiPayment.findFirst({ where: { userId: user.id, status: "pending" }, orderBy: { createdAt: "desc" } }),
+  const [last, ent] = await Promise.all([
+    prisma.upiPayment.findFirst({ where: { userId: user.id, status: "auto_activated" }, orderBy: { createdAt: "desc" } }),
     getEntitlement(user),
   ]);
 
@@ -38,15 +38,12 @@ export default async function UpiCheckoutPage() {
     <div className="max-w-2xl space-y-5" data-testid="upi-checkout">
       <PageHeader eyebrow="Billing" title="Pay with UPI" />
       {ent.plan === "pro" ? (
-        <p className="rounded-2xl bg-teal-soft px-4 py-3 text-sm font-semibold">
-          Pro is active{ent.currentPeriodEnd ? ` until ${ent.currentPeriodEnd.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}` : ""}. Paying again adds 30 days after that date.
-        </p>
-      ) : null}
-      {pending ? (
-        <div className="desk-card space-y-1 p-5" data-testid="upi-pending">
-          <p className="text-lg font-bold">Pending verification</p>
-          <p className="text-sm text-muted">UTR {pending.utr} · reference {pending.ref} · submitted {pending.createdAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</p>
-          <p className="text-sm text-muted">We verify UPI payments manually, typically within 24 hours. Pro turns on once it is approved.</p>
+        <div className="desk-card space-y-1 p-5" data-testid="upi-active">
+          <p className="text-lg font-bold">Pro is active</p>
+          <p className="text-sm text-muted">
+            {ent.currentPeriodEnd ? `Your Pro access runs until ${ent.currentPeriodEnd.toLocaleString("en-IN", { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })} IST. ` : ""}
+            You can pay again for another 30 days after it ends.{last ? ` Last payment: UTR ${last.utr}, ref ${last.ref}.` : ""}
+          </p>
           <Link href="/settings/billing" className="text-sm font-semibold underline">Back to billing</Link>
         </div>
       ) : (
@@ -72,9 +69,9 @@ export default async function UpiCheckoutPage() {
             </div>
           </div>
           <div className="desk-card space-y-3 p-5">
-            <p className="font-semibold">2. After paying, enter the 12-digit UTR (UPI transaction / reference ID) from your app.</p>
+            <p className="font-semibold">2. After paying, enter the 12-digit UTR (UPI transaction / reference ID) from your app. Pro activates instantly.</p>
             <UtrForm paymentRef={ref} />
-            <p className="text-xs text-muted">We verify UPI payments manually, typically within 24 hours. A 30-day Pro period starts when your payment is approved. Plans do not renew automatically.</p>
+            <p className="text-xs text-muted">Pro is activated instantly for 30 days when you submit a valid UTR. We check every payment against our UPI account and may revoke access if the payment was not received. Plans do not renew automatically.</p>
           </div>
         </>
       )}

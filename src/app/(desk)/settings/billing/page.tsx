@@ -32,10 +32,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   const config = stripeConfig();
   const providerReady = getBillingProvider().configured();
   const upi = activeProviderId() === "upi_manual";
-  const [pendingUpi, account] = await Promise.all([
-    prisma.upiPayment.findFirst({ where: { userId: user.id, status: "pending" }, orderBy: { createdAt: "desc" } }),
-    prisma.billingAccount.findUnique({ where: { userId: user.id } }),
-  ]);
+  const account = await prisma.billingAccount.findUnique({ where: { userId: user.id } });
   const pct = Math.min(100, Math.round((used / ent.aiPerMonth) * 100));
 
   return (
@@ -48,11 +45,6 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       ) : null}
       {query.checkout === "success" ? (
         <p className="rounded-2xl bg-teal-soft px-4 py-3 text-sm font-semibold">Thanks! Your payment went through. Pro turns on as soon as the payment provider confirms it, usually within a few seconds.</p>
-      ) : null}
-      {pendingUpi ? (
-        <p className="rounded-2xl bg-sun-soft px-4 py-3 text-sm font-semibold" data-testid="upi-pending-status">
-          UPI payment (UTR {pendingUpi.utr}) is pending verification. We usually verify within 24 hours.
-        </p>
       ) : null}
       {query.error && ERRORS[query.error] ? <p className="rounded-2xl bg-coral-soft px-4 py-3 text-sm font-semibold">{ERRORS[query.error]}</p> : null}
 
@@ -75,9 +67,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       </section>
 
       <div className="flex flex-wrap gap-3">
-        {upi && providerReady && !pendingUpi ? (
+        {upi && providerReady && ent.plan !== "pro" ? (
           <Link href="/settings/billing/upi" className="inline-flex h-12 items-center rounded-full bg-sun px-6 font-bold text-ink" data-testid="upi-pay-link">
-            {ent.plan === "pro" ? "Extend 30 days with UPI" : `Pay ${formatInr(price.totalPaise)} with UPI`}
+            {`Pay ${formatInr(price.totalPaise)} with UPI · Pro for 30 days`}
           </Link>
         ) : null}
         {account?.state === "active" ? (

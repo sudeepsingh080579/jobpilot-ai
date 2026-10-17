@@ -38,3 +38,23 @@ describe("upi_manual provider", () => {
     expect(c.ok && c.snapshot.state).toBe("cancel_scheduled");
   });
 });
+
+describe("instant activation copy and notify config", () => {
+  it("defaults admin notifications to futurestacklearning@gmail.com", async () => {
+    const { adminNotifyEmail } = await import("@/server/upi-store");
+    expect(adminNotifyEmail({})).toBe("futurestacklearning@gmail.com");
+    expect(adminNotifyEmail({ ADMIN_NOTIFY_EMAIL: "x@y.in" })).toBe("x@y.in");
+  });
+  it("terms and refund describe instant activation and possible revocation", async () => {
+    const { termsSections, refundSections } = await import("@/lib/legal-content");
+    const text = [...termsSections(), ...refundSections()].flatMap((s) => s.body).join(" ");
+    expect(text).toMatch(/activated instantly/);
+    expect(text).toMatch(/may revoke/);
+    expect(text).not.toMatch(/verified manually|within 24 hours/);
+  });
+  it("revoke ends Pro immediately via the state machine", () => {
+    const active = { state: "active" as const, trialEndsAt: null, periodEnd: new Date(Date.now() + 864e5), appliedPayments: ["upi:x"] };
+    const r = transition(active, { type: "CANCEL_REQUESTED", atPeriodEnd: false });
+    expect(r.ok && r.snapshot.state).toBe("cancelled");
+  });
+});

@@ -532,3 +532,18 @@ model AdminAuditLog {
 
   @@index([targetType, targetId])
 }
+
+/// Admin notifications (e.g. UPI auto-activation). Always stored; emailed when a mailer is configured.
+model AdminNotification {
+  id        String   @id @default(cuid())
+  kind      String
+  to        String
+  subject   String
+  body      String
+  /// resend | smtp | console | failed
+  sentVia   String
+  error     String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

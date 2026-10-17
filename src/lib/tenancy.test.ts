@@ -10,8 +10,8 @@ import { describe, expect, it } from "vitest";
  */
 const REVIEWED: { file: string; pattern: RegExp; why: string }[] = [
   { file: "src/app/(desk)/admin/page.tsx", pattern: /prisma\.(user|subscription)\.(findMany|count)/, why: "admin only, gated by ADMIN_EMAILS" },
-  { file: "src/app/(desk)/admin/payments/page.tsx", pattern: /prisma\.(upiPayment|adminAuditLog)\.findMany/, why: "admin only, gated by ADMIN_EMAILS" },
-  { file: "src/server/upi-store.ts", pattern: /prisma\.(upiPayment\.(findUnique|updateMany)|adminAuditLog\.create)/, why: "admin review by payment id; callers in upi-actions.ts check isAdmin(actionUser())" },
+  { file: "src/app/(desk)/admin/payments/page.tsx", pattern: /prisma\.(upiPayment|adminAuditLog|adminNotification)\.findMany/, why: "admin only, gated by ADMIN_EMAILS" },
+  { file: "src/server/upi-store.ts", pattern: /prisma\.(upiPayment\.(findUnique|updateMany|update|delete)|adminAuditLog\.create|adminNotification\.create)/, why: "by payment id just created for the session user, or admin revoke (isAdmin checked in upi-actions.ts)" },
   { file: "src/auth.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ email \} \}\)/, why: "sign-in lookup by email" },
   { file: "src/server/auth-actions.ts", pattern: /prisma\.(user|authToken)\./, why: "sign-up, reset and verify operate on the account itself" },
   { file: "src/server/auth-tokens.ts", pattern: /prisma\.authToken\./, why: "hashed single-use token lookup" },

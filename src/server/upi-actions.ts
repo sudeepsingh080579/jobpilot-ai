@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isAdmin } from "@/lib/admin";
 import { actionUser } from "@/server/session";
-import { approveUpiPayment, cancelAtPeriodEnd, rejectUpiPayment, submitUpiPayment, type UpiResult } from "@/server/upi-store";
+import { cancelAtPeriodEnd, revokeUpiPayment, submitUpiPayment, type UpiResult } from "@/server/upi-store";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function submitUtrAction(_prev: UpiResult | null, form: FormData): Promise<UpiResult> {
@@ -20,17 +20,10 @@ export async function submitUtrAction(_prev: UpiResult | null, form: FormData): 
   return r;
 }
 
-export async function approvePaymentAction(form: FormData) {
+export async function revokePaymentAction(form: FormData) {
   const admin = await actionUser();
   if (!admin || !isAdmin(admin.email)) throw new Error("Not allowed");
-  await approveUpiPayment(String(form.get("id")), admin.email);
-  revalidatePath("/admin/payments");
-}
-
-export async function rejectPaymentAction(form: FormData) {
-  const admin = await actionUser();
-  if (!admin || !isAdmin(admin.email)) throw new Error("Not allowed");
-  await rejectUpiPayment(String(form.get("id")), admin.email, String(form.get("note") ?? ""));
+  await revokeUpiPayment(String(form.get("id")), admin.email, String(form.get("note") ?? ""));
   revalidatePath("/admin/payments");
 }
 

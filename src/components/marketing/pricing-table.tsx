@@ -44,9 +44,9 @@ export function PricingTable({ signedIn, configured, currentPlan, checkoutHref }
           <p className="mt-1 text-sm text-white/80">Everything, for a serious search.</p>
           <p className="mt-5 text-4xl font-bold" data-testid="pro-price">
             ₹1,999
-            <span className="text-base font-semibold text-white/80"> / month</span>
+            <span className="text-base font-semibold text-white/80"> / 30 days</span>
           </p>
-          <p className="text-sm text-white/80" data-testid="pro-total">incl. 18% GST. ₹1,999 payable a month. Billed monthly. Cancel any time.</p>
+          <p className="text-sm text-white/80" data-testid="pro-total">incl. 18% GST. Pro for 30 days, pay again to continue.</p>
           <ul className="mt-5 space-y-2 text-sm">
             {PRO_FEATURES.map((item) => (
               <li key={item} className="flex gap-2"><Check className="size-4 shrink-0 text-sun" />{item}</li>
@@ -60,7 +60,7 @@ export function PricingTable({ signedIn, configured, currentPlan, checkoutHref }
             <p className="mt-6 rounded-2xl bg-white/15 px-4 py-3 text-sm" data-testid="payments-not-configured">Payments are not configured on this server yet.</p>
           ) : checkoutHref ? (
             <Link href={checkoutHref} data-testid="checkout" className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-sun font-bold text-ink">
-              {isCurrent ? "Extend Pro by 30 days (UPI)" : "Pay ₹1,999 with UPI"}
+              {isCurrent ? "Pro is active" : "Pay ₹1,999 with UPI"}
             </Link>
           ) : isCurrent ? (
             <p className="mt-6 rounded-2xl bg-white/15 px-4 py-3 text-sm font-semibold">This is your current plan.</p>
@@ -74,7 +74,7 @@ export function PricingTable({ signedIn, configured, currentPlan, checkoutHref }
           )}
         </div>
       </div>
-      <p className="mt-4 text-center text-xs text-muted">All prices in Indian Rupees (INR). Pro: ₹1,999 per month incl. 18% GST (taxable value ₹1,694.07 + GST ₹304.93). Monthly plan only.</p>
+      <p className="mt-4 text-center text-xs text-muted">All prices in Indian Rupees (INR). Pro: ₹1,999 for 30 days incl. 18% GST (taxable value ₹1,694.07 + GST ₹304.93). Monthly plan only.</p>
     </div>
   );
 }

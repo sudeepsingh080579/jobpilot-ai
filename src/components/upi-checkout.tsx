@@ -35,7 +35,7 @@ export function UtrForm({ paymentRef }: { paymentRef: string }) {
       </label>
       {state && !state.ok ? <p role="alert" className="rounded-xl bg-coral-soft p-2 text-sm font-semibold">{state.error}</p> : null}
       <button type="submit" disabled={pending} className="h-11 rounded-full bg-indigo px-6 font-bold text-white disabled:opacity-50">
-        {pending ? "Submitting…" : "Submit payment for verification"}
+        {pending ? "Activating…" : "Submit UTR and activate Pro"}
       </button>
     </form>
   );
