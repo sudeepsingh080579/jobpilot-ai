@@ -20,10 +20,11 @@ export async function consumeToken(token: string, kind: TokenKind) {
   return row.userId;
 }
 
+/** Returns { delivered } so callers never claim an email was sent when no mailer is configured. */
 export async function sendVerificationEmail(user: { id: string; email: string; name: string }) {
   const token = await issueToken(user.id, "verify_email");
   const link = `${appUrl()}/verify-email?token=${encodeURIComponent(token)}`;
-  await sendEmail({
+  return sendEmail({
     to: user.email,
     subject: `Confirm your email for ${brand.name}`,
     text: `Hi ${user.name},\n\nConfirm your email address to finish setting up ${brand.name}:\n${link}\n\nThe link works for 48 hours. If you did not sign up, ignore this email.`,
@@ -33,7 +34,7 @@ export async function sendVerificationEmail(user: { id: string; email: string; n
 export async function sendResetEmail(user: { id: string; email: string; name: string }) {
   const token = await issueToken(user.id, "reset_password");
   const link = `${appUrl()}/reset-password?token=${encodeURIComponent(token)}`;
-  await sendEmail({
+  return sendEmail({
     to: user.email,
     subject: `Reset your ${brand.name} password`,
     text: `Hi ${user.name},\n\nUse this link to choose a new password:\n${link}\n\nThe link works for 1 hour. If you did not ask for this, ignore this email; your password stays the same.`,

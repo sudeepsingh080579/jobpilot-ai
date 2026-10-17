@@ -17,6 +17,7 @@ export default async function ForgotPage({ searchParams }: { searchParams: Promi
             Email
             <input className="field mt-1" name="email" type="email" autoComplete="email" required />
           </label>
+          {query.error === "nomail" ? <p className="text-sm text-bad">Password reset by email is not available yet. Please contact us via the <Link className="underline" href="/support">Support page</Link>.</p> : null}
           {query.error === "rate" ? <p className="text-sm text-bad">Too many requests. Try again later.</p> : null}
           <button className={primaryButton} type="submit">Send reset link</button>
         </form>

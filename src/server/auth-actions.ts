@@ -12,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { clientIp, LIMITS, rateLimit } from "@/lib/rate-limit";
 import { DEFAULT_TEMPLATES } from "@/lib/outreach/templates";
 import { consumeToken, sendResetEmail, sendVerificationEmail } from "@/server/auth-tokens";
+import { emailMode } from "@/lib/email";
 
 const registerSchema = z.object({
   name: z.string().trim().min(1).max(80),
@@ -62,11 +63,13 @@ export async function registerAction(formData: FormData) {
       passwordHash: await bcrypt.hash(parsed.data.password, 12),
       trialEndsAt: new Date(Date.now() + TRIAL_DAYS * 86400000),
       marketingConsent: formData.get("marketing") === "on",
+      // No mailer configured: verification cannot be delivered, so it must not gate the account.
+      ...(emailMode() === "console" ? { emailVerified: new Date() } : {}),
       templates: { create: DEFAULT_TEMPLATES },
     },
   });
   await startTrial(user.id).catch((error) => console.error("trial start failed", error));
-  await sendVerificationEmail(user).catch((error) => console.error("verification email failed", error));
+  if (!user.emailVerified) await sendVerificationEmail(user).catch((error) => console.error("verification email failed", error));
   await signIn("credentials", { email, password: parsed.data.password, redirectTo: "/onboarding" });
 }
 
@@ -76,8 +79,18 @@ export async function resendVerificationAction() {
   const limit = await rateLimit(`verify:${session.user.id}`, LIMITS.reset.max, LIMITS.reset.windowMs);
   if (!limit.ok) redirect("/verify-email?sent=rate");
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (user && !user.emailVerified) await sendVerificationEmail(user);
-  redirect("/verify-email?sent=1");
+  if (!user || user.emailVerified) redirect("/dashboard");
+  if (emailMode() === "console") {
+    await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
+    redirect("/dashboard");
+  }
+  let delivered = false;
+  try {
+    delivered = (await sendVerificationEmail(user)).delivered;
+  } catch (error) {
+    console.error("verification email failed", error);
+  }
+  redirect(delivered ? "/verify-email?sent=1" : "/verify-email?sent=failed");
 }
 
 export async function verifyEmail(token: string) {
@@ -92,6 +105,7 @@ export async function forgotPasswordAction(formData: FormData) {
   const limit = await rateLimit(`reset:${await ip()}`, LIMITS.reset.max, LIMITS.reset.windowMs);
   if (!limit.ok) redirect("/forgot-password?error=rate");
   const user = email ? await prisma.user.findUnique({ where: { email } }) : null;
+  if (emailMode() === "console") redirect("/forgot-password?error=nomail");
   if (user) await sendResetEmail(user).catch((error) => console.error("reset email failed", error));
   // Same answer whether or not the account exists, so emails cannot be enumerated.
   redirect("/forgot-password?sent=1");
