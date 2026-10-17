@@ -12,8 +12,11 @@ export async function submitUtrAction(_prev: UpiResult | null, form: FormData): 
   const rl = await rateLimit(`upi:${user.id}`, 10, 60 * 60 * 1000);
   if (!rl.ok) return { ok: false, error: "Too many attempts. Try again later." };
   const r = await submitUpiPayment(user.id, String(form.get("ref") ?? ""), String(form.get("utr") ?? ""));
-  revalidatePath("/settings/billing");
-  revalidatePath("/settings/billing/upi");
+  // Only re-render on success, so the reference in the QR the user already paid stays the same after a typo.
+  if (r.ok) {
+    revalidatePath("/settings/billing");
+    revalidatePath("/settings/billing/upi");
+  }
   return r;
 }
 
