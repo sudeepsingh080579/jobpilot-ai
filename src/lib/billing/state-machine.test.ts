@@ -12,10 +12,11 @@ const step = (s: Snapshot, e: Parameters<typeof transition>[1]) => {
 };
 
 describe("pricing", () => {
-  it("₹2,000 + 18% GST = ₹2,360 in paise", () => {
-    expect(priceBreakdown()).toEqual({ currency: "INR", basePaise: 200000, gstRateBps: 1800, gstPaise: 36000, totalPaise: 236000 });
-    expect(formatInr(200000)).toBe("₹2,000");
-    expect(formatInr(236000)).toBe("₹2,360");
+  it("₹1,999 incl. 18% GST = ₹1,694.07 + ₹304.93 in paise", () => {
+    expect(priceBreakdown()).toEqual({ currency: "INR", basePaise: 169407, gstRateBps: 1800, gstPaise: 30493, totalPaise: 199900 });
+    expect(formatInr(199900)).toBe("₹1,999");
+    expect(formatInr(169407)).toBe("₹1,694.07");
+    expect(formatInr(30493)).toBe("₹304.93");
   });
 });
 

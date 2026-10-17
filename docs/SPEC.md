@@ -67,7 +67,7 @@ Free trial
 
 Paid subscription
 
-- Price: ₹2,000 INR per month.
+- Price: ₹1,999 INR per month incl. 18% GST (updated 17 Oct 2026; was ₹2,000 + GST).
 - Display prices in Indian rupees.
 - Show applicable GST and the final payable amount clearly before checkout.
 - Provide invoices and payment history.
@@ -90,7 +90,7 @@ and alerts.
 Phase 5: Implement monetization
 
 - Seven-day trial.
-- ₹2,000 monthly plan.
+- ₹1,999 (GST-inclusive) monthly plan.
 - Checkout and payment integration.
 - Webhooks and reconciliation.
 - Subscription enforcement.
@@ -148,7 +148,7 @@ The product is not ready to declare complete until:
 5. Full-time, part-time, and contract selections support multiple choices.
 6. Preferences are saved and editable.
 7. The seven-day trial starts and expires correctly.
-8. The ₹2,000 monthly subscription is correctly represented in the billing system.
+8. The ₹1,999 monthly subscription is correctly represented in the billing system.
 9. Payment events are verified and processed idempotently.
 10. Access is enforced on the server.
 11. Real job-source integrations return verifiable listings when configured.

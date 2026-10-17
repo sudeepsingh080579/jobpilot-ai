@@ -64,7 +64,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       <div className="flex flex-wrap gap-3">
         {ent.plan !== "pro" ? (
           <Link href="/pricing" className="inline-flex h-12 items-center rounded-full bg-sun px-6 font-bold text-ink" data-testid="upgrade-link">
-            Upgrade · {formatInr(price.basePaise)}/month + GST ({formatInr(price.totalPaise)} total)
+            Upgrade · {formatInr(price.totalPaise)}/month incl. {price.gstRateBps / 100}% GST
           </Link>
         ) : null}
         {sub && config.secretKey ? (

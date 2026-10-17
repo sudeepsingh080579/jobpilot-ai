@@ -43,10 +43,10 @@ export function PricingTable({ signedIn, configured, currentPlan }: Props) {
           <h3 className="text-xl font-bold">Pro Monthly</h3>
           <p className="mt-1 text-sm text-white/80">Everything, for a serious search.</p>
           <p className="mt-5 text-4xl font-bold" data-testid="pro-price">
-            ₹2,000
+            ₹1,999
             <span className="text-base font-semibold text-white/80"> / month</span>
           </p>
-          <p className="text-sm text-white/80" data-testid="pro-total">+ 18% GST = ₹2,360 payable a month. Billed monthly. Cancel any time.</p>
+          <p className="text-sm text-white/80" data-testid="pro-total">incl. 18% GST. ₹1,999 payable a month. Billed monthly. Cancel any time.</p>
           <ul className="mt-5 space-y-2 text-sm">
             {PRO_FEATURES.map((item) => (
               <li key={item} className="flex gap-2"><Check className="size-4 shrink-0 text-sun" />{item}</li>
@@ -70,7 +70,7 @@ export function PricingTable({ signedIn, configured, currentPlan }: Props) {
           )}
         </div>
       </div>
-      <p className="mt-4 text-center text-xs text-muted">All prices in Indian Rupees (INR). Pro: ₹2,000 + ₹360 GST (18%) = ₹2,360 payable per month. Monthly plan only.</p>
+      <p className="mt-4 text-center text-xs text-muted">All prices in Indian Rupees (INR). Pro: ₹1,999 per month incl. 18% GST (taxable value ₹1,694.07 + GST ₹304.93). Monthly plan only.</p>
     </div>
   );
 }

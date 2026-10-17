@@ -7,7 +7,7 @@ import { applyBillingEvent } from "@/server/billing-store";
 
 export const runtime = "nodejs";
 
-/** GET: price breakdown shown before checkout (₹2,000 + GST). POST: create a provider subscription. */
+/** GET: price breakdown shown before checkout (₹1,999 incl. GST). POST: create a provider subscription. */
 export async function GET() {
   return Response.json(priceBreakdown(undefined, gstRateBps()));
 }

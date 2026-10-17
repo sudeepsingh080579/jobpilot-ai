@@ -13,8 +13,8 @@ const active = (over: Partial<{ status: string; plan: string; currentPeriodEnd: 
 });
 
 describe("entitlements", () => {
-  it("price is ₹2,000/month (paise), annual not sold", () => {
-    expect(PRICES.pro_monthly).toMatchObject({ amountPaise: 200000, currency: "INR", interval: "month", sold: true });
+  it("price is ₹1,999/month (paise), annual not sold", () => {
+    expect(PRICES.pro_monthly).toMatchObject({ amountPaise: 199900, currency: "INR", interval: "month", sold: true });
     expect(PRICES.pro_annual.sold).toBe(false);
   });
 

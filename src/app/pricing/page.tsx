@@ -7,7 +7,7 @@ import { SiteFooter, SiteHeader } from "@/components/marketing/site-chrome";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Pro at ₹2,000 a month + 18% GST (₹2,360 total). Start with a 7-day free trial, no card needed.",
+  description: "Pro at ₹1,999 a month, incl. 18% GST. Start with a 7-day free trial, no card needed.",
 };
 
 export default async function PricingPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
@@ -29,7 +29,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           {[
             ["Can I cancel any time?", "Yes. You keep Pro until the end of the period you paid for."],
             ["What happens after the trial?", "Your account moves to the Free plan. Nothing is deleted and you are never charged unless you upgrade."],
-            ["Do you add tax?", "Yes. 18% GST is added to the ₹2,000 monthly price, so you pay ₹2,360 a month. All prices are in Indian Rupees."],
+            ["Is GST included?", "Yes. ₹1,999 a month includes 18% GST (₹1,694.07 + ₹304.93 GST). That is the full amount you pay. All prices are in Indian Rupees."],
             ["Is there an annual plan?", "No. Pro is a monthly plan only."],
           ].map(([q, a]) => (
             <div key={q} className="desk-card p-5">

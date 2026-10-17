@@ -7,12 +7,12 @@ Spec: `docs/SPEC.md` (note: sections 4–24 of the original prompt were truncate
 Next.js App Router (PWA: manifest + service worker), TypeScript, Tailwind, Prisma 6 / Postgres (Neon in prod: pooled `DATABASE_URL`, unpooled `DIRECT_URL`), Auth.js credentials, Vercel hosting.
 
 ## Billing design (phase 2)
-- `src/lib/billing/pricing.ts` — ₹2,000 base in paise, GST (default 18%, `GST_RATE_BPS`) computed once; total ₹2,360 shown before checkout (`GET /api/billing/checkout`, pricing page, billing settings).
+- `src/lib/billing/pricing.ts` — ₹1,999 GST-inclusive total in paise; taxable value ₹1,694.07 and GST ₹304.93 (18%, `GST_RATE_BPS`) derived once; shown before checkout (`GET /api/billing/checkout`, pricing page, billing settings).
 - `src/lib/billing/state-machine.ts` — pure state machine: none → trialing → trial_expired → pending_payment → active ⇄ past_due → halted / cancel_scheduled → cancelled. `accessFor()` is the single server-side access decision. One trial per account; duplicate payment ids ignored; non-extending payments rejected; no second concurrent subscription; nothing auto-charges after the trial.
 - `src/lib/billing/providers/*` — `BillingProvider` interface; Razorpay adapter (default) and Stripe adapter (`BILLING_PROVIDER=stripe`).
 - `src/server/billing-store.ts` — only writer of `BillingAccount`, serializable transaction + optimistic version; `processWebhookEvent` dedupes on `BillingEventLog` id `provider:eventId` and audits from/to state.
 - Routes: `POST /api/billing/checkout` (creates Razorpay subscription, returns Checkout.js params), `POST /api/billing/webhook/razorpay` (HMAC over raw body), `POST /api/billing/verify` (checkout signature check only — access is granted solely by the signed webhook).
-- Razorpay plan note: Razorpay subscriptions charge the plan amount, so create the plan at ₹2,360 (₹2,000 + 18% GST) or configure GST via invoices per your CA's advice.
+- Razorpay plan note: Razorpay subscriptions charge the plan amount, so create the plan at ₹1,999 (GST-inclusive) or configure GST via invoices per your CA's advice.
 
 ## Onboarding (phase 2)
 `/onboarding` 7 steps: Resume → Target roles → Locations → Work style → Experience & pay → Skills & industries → Review. Draft saved on every step (`savePreferences`), completion validated server-side (`src/lib/onboarding/preferences.ts`). Locations: ordered chips, max 10, reorder/remove buttons, remote words rejected as cities; Remote-India and Remote-International are separate flags. Work arrangement and employment type are multi-select checkboxes. New registrations start the trial and land on `/onboarding`.
@@ -30,7 +30,7 @@ Legend: ✅ implemented + tested · 🔑 implemented, awaiting credentials · �
 |---|---|---|
 | Register / login / logout, email verify, password reset | ✅ | existing; e2e in `e2e/` |
 | 7-day no-card trial (state machine + DB) | ✅ | unit + Postgres tests |
-| ₹2,000 + GST price display | ✅ | pricing page, billing settings, API |
+| ₹1,999 incl. GST price display | ✅ | pricing page, billing settings, API |
 | Subscription state machine, server-side access | ✅ | `accessFor`; legacy `getEntitlement` still drives AI gating — switch-over in phase 5 🟡 |
 | Razorpay checkout / webhook / signature verify | 🔑 | adapter + routes tested with fakes; needs keys, plan id, webhook secret; Checkout.js button UI not yet wired (phase 5) |
 | Idempotent webhook processing | ✅ | concurrent duplicate test against Postgres |

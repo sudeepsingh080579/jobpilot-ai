@@ -8,7 +8,7 @@ export function termsSections(): LegalSection[] {
     { heading: "1. Agreement", body: [`These Terms are an agreement between you and ${c.entity} ("we") for use of JobPilot AI (the "Service"). By creating an account you accept them.`] },
     { heading: "2. Accounts", body: ["You must be at least 18 years old to create an account. Keep your password safe; you are responsible for activity on your account. Tell us promptly about any unauthorised use."] },
     { heading: "3. Free trial", body: ["New accounts get a 7-day Pro trial without a payment method. When it ends the account moves to the Free plan. You are never charged unless you choose to subscribe."] },
-    { heading: "4. Subscription and billing", body: ["Pro is a monthly plan priced at ₹2,000 per month plus 18% GST (₹2,360 per month in total). It is billed in Indian Rupees and renews monthly until cancelled. You can cancel at any time; Pro access continues until the end of the month you have paid for and is not renewed after that. We will give at least 30 days' notice of any price change before your next renewal."] },
+    { heading: "4. Subscription and billing", body: ["Pro is a monthly plan priced at ₹1,999 per month, inclusive of 18% GST. It is billed in Indian Rupees and renews monthly until cancelled. You can cancel at any time; Pro access continues until the end of the month you have paid for and is not renewed after that. We will give at least 30 days' notice of any price change before your next renewal."] },
     { heading: "5. AI output", body: ["The Service uses AI to draft text. Output may be inaccurate or incomplete. Review everything before you use or send it. We never send messages or apply to jobs on your behalf."] },
     { heading: "6. Acceptable use", body: ["Do not use the Service unlawfully, attempt to break its security or usage limits, scrape it, or upload content that infringes others' rights."] },
     { heading: "7. Your content", body: ["You own the content you upload, such as resumes. You allow us to store and process it only to provide the Service. You can export it or delete your account at any time from Settings."] },
@@ -50,7 +50,7 @@ export function refundSections(): LegalSection[] {
   const contact = contactText(c.supportEmail);
   return [
     { heading: "Free trial first", body: ["Every account gets 7 days of Pro without a card, so you can decide before you pay. Nothing is charged when the trial ends."] },
-    { heading: "Monthly plan", body: ["Pro is billed monthly at ₹2,000 plus 18% GST (₹2,360 in total). There is no annual plan. You can cancel at any time; you keep Pro until the end of the month you have paid for and you are not charged again."] },
+    { heading: "Monthly plan", body: ["Pro is billed monthly at ₹1,999, inclusive of 18% GST. There is no annual plan. You can cancel at any time; you keep Pro until the end of the month you have paid for and you are not charged again."] },
     { heading: "Partial months", body: ["Payments already made are not refunded for unused days of a month, except where a refund is required by law or the charge was an error."] },
     { heading: "Billing errors", body: ["If you were charged in error or charged twice, contact us and we will refund the incorrect amount to the original payment method."] },
     { heading: "How to contact us", body: [`Reach us at ${contact} from your account email with the date and amount of the charge.`] },

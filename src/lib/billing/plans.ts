@@ -7,7 +7,7 @@ import type { AiTask } from "@/lib/ai/types";
  * Model (spec §3): every new account gets a 7-day trial with no card. When
  * the trial ends without a subscription the account is "free" in name only:
  * the user keeps read access to their own data, settings, export and
- * deletion, but AI and premium features need an explicit ₹2,000/month
+ * deletion, but AI and premium features need an explicit ₹1,999/month
  * (+GST) purchase. Nothing is ever charged automatically.
  */
 import { PLAN_PRICE_PAISE } from "@/lib/billing/pricing";
@@ -20,7 +20,7 @@ export const TRIAL_DAYS = 7;
 
 /** pro_annual is legacy (earlier USD Stripe plan) and is not sold any more. */
 export const PRICES: Record<PaidPlan, { label: string; amountPaise: number; currency: "INR"; interval: "month" | "year"; note: string; sold: boolean }> = {
-  pro_monthly: { label: "Pro Monthly", amountPaise: PLAN_PRICE_PAISE, currency: "INR", interval: "month", note: "Billed monthly + GST. Cancel any time.", sold: true },
+  pro_monthly: { label: "Pro Monthly", amountPaise: PLAN_PRICE_PAISE, currency: "INR", interval: "month", note: "Billed monthly, incl. 18% GST. Cancel any time.", sold: true },
   pro_annual: { label: "Pro Annual (legacy)", amountPaise: 0, currency: "INR", interval: "year", note: "No longer offered.", sold: false },
 };
 
@@ -121,7 +121,7 @@ export function usagePeriod(now = new Date()) {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-export const TRIAL_OVER = "Your 7-day free trial has ended. Subscribe for ₹2,000 a month (+18% GST) to keep using AI features. Your data stays yours either way.";
+export const TRIAL_OVER = "Your 7-day free trial has ended. Subscribe for ₹1,999 a month (incl. 18% GST) to keep using AI features. Your data stays yours either way.";
 
 export type AiDecision = { ok: true } | { ok: false; reason: "feature" | "quota"; message: string };
 

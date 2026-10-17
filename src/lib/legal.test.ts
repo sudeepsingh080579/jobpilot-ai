@@ -42,8 +42,9 @@ describe("pricing currency", () => {
       expect(s).not.toMatch(/USD|\bVAT\b|sales tax|\$\d/i);
       expect(s).not.toMatch(/annual/i.source === "" ? /x^/ : /Pro Annual|switch between monthly and annual/i);
     }
-    expect(table).toContain("₹2,000");
-    expect(table).toContain("₹2,360");
+    expect(table).toContain("₹1,999");
+    expect(table).toContain("incl. 18% GST");
+    for (const s of [table, page]) expect(s).not.toMatch(/₹2,000|₹2,360/);
     expect(table).toContain("GST");
     expect(table).toContain("Indian Rupees");
   });
