@@ -18,8 +18,7 @@ const PRO_FEATURES = [
 const FREE_FEATURES = ["Job tracker board", "Resume editor and score", "Read, export or delete your data", "No AI features after the trial"];
 
 export function PricingTable({ signedIn, configured, currentPlan }: Props) {
-  const annual = false; // India plan is monthly only (spec §3)
-  const plan = annual ? "pro_annual" : "pro_monthly";
+  const plan = "pro_monthly"; // India plan is monthly only (spec §3)
   const isCurrent = currentPlan === plan;
 
   return (
@@ -41,13 +40,13 @@ export function PricingTable({ signedIn, configured, currentPlan }: Props) {
 
         <div className="relative rounded-3xl bg-gradient-to-br from-indigo via-violet to-indigo-deep p-6 text-white shadow-lg">
           <span className="absolute right-5 top-5 rounded-full bg-coral px-3 py-1 text-xs font-bold">Most popular</span>
-          <h3 className="text-xl font-bold">Pro {annual ? "Annual" : "Monthly"}</h3>
+          <h3 className="text-xl font-bold">Pro Monthly</h3>
           <p className="mt-1 text-sm text-white/80">Everything, for a serious search.</p>
           <p className="mt-5 text-4xl font-bold" data-testid="pro-price">
             ₹2,000
-            <span className="text-base font-semibold text-white/80"> / {annual ? "year" : "month"}</span>
+            <span className="text-base font-semibold text-white/80"> / month</span>
           </p>
-          <p className="text-sm text-white/80">+ 18% GST = ₹2,360 a month. Billed monthly. Cancel any time.</p>
+          <p className="text-sm text-white/80" data-testid="pro-total">+ 18% GST = ₹2,360 payable a month. Billed monthly. Cancel any time.</p>
           <ul className="mt-5 space-y-2 text-sm">
             {PRO_FEATURES.map((item) => (
               <li key={item} className="flex gap-2"><Check className="size-4 shrink-0 text-sun" />{item}</li>
@@ -65,13 +64,13 @@ export function PricingTable({ signedIn, configured, currentPlan }: Props) {
             <form action={currentPlan ? "/api/stripe/portal" : "/api/stripe/checkout"} method="post" className="mt-6">
               <input type="hidden" name="plan" value={plan} />
               <button type="submit" data-testid="checkout" className="h-12 w-full rounded-full bg-sun font-bold text-ink">
-                {currentPlan ? `Switch to ${annual ? "Annual" : "Monthly"} in billing` : `Upgrade to Pro ${annual ? "Annual" : "Monthly"}`}
+                {currentPlan ? "Manage billing" : "Upgrade to Pro Monthly"}
               </button>
             </form>
           )}
         </div>
       </div>
-      <p className="mt-4 text-center text-xs text-muted">Prices in USD. Sales tax or VAT is added at checkout where it applies. Promo codes accepted at checkout.</p>
+      <p className="mt-4 text-center text-xs text-muted">All prices in Indian Rupees (INR). Pro: ₹2,000 + ₹360 GST (18%) = ₹2,360 payable per month. Monthly plan only.</p>
     </div>
   );
 }

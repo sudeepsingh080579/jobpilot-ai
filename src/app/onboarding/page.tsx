@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/server/session";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
@@ -7,6 +8,7 @@ export const metadata = { title: "Set up your job search" };
 
 export default async function OnboardingPage() {
   const user = await requireUser();
+  if (user.onboardingCompletedAt) redirect("/dashboard");
   const [prefs, resumes, access] = await Promise.all([
     prisma.jobPreferences.findUnique({ where: { userId: user.id } }),
     prisma.resume.findMany({ where: { userId: user.id }, select: { id: true, title: true }, orderBy: { createdAt: "desc" }, take: 5 }),

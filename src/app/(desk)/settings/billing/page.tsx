@@ -15,11 +15,11 @@ const ERRORS: Record<string, string> = {
   verify: "Confirm your email address before upgrading.",
   already: "You already have an active subscription. Use Manage billing to change it.",
   rate: "Too many attempts. Try again in a few minutes.",
-  stripe: "Stripe did not return a checkout page. Try again.",
+  stripe: "The payment provider did not return a checkout page. Try again.",
 };
 
 function fmt(date: Date | null) {
-  return date ? date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }) : "";
+  return date ? date.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }) : "";
 }
 
 export default async function BillingPage({ searchParams }: { searchParams: Promise<{ checkout?: string; error?: string }> }) {
@@ -35,11 +35,11 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
       <PageHeader eyebrow="Account" title="Plan and billing" />
       {!config.configured ? (
         <p className="rounded-2xl border-2 border-sun bg-sun-soft px-4 py-3 text-sm font-semibold" data-testid="payments-not-configured">
-          Payments are not configured on this server yet. Add the Stripe keys and price ids (see README → Launch checklist) to enable upgrades.
+          Payments are not configured on this server yet. Upgrades will open here once checkout is enabled.
         </p>
       ) : null}
       {query.checkout === "success" ? (
-        <p className="rounded-2xl bg-teal-soft px-4 py-3 text-sm font-semibold">Thanks! Your payment went through. Pro turns on as soon as Stripe confirms it, usually within a few seconds.</p>
+        <p className="rounded-2xl bg-teal-soft px-4 py-3 text-sm font-semibold">Thanks! Your payment went through. Pro turns on as soon as the payment provider confirms it, usually within a few seconds.</p>
       ) : null}
       {query.error && ERRORS[query.error] ? <p className="rounded-2xl bg-coral-soft px-4 py-3 text-sm font-semibold">{ERRORS[query.error]}</p> : null}
 

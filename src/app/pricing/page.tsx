@@ -27,10 +27,10 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </div>
         <section className="mt-16 grid gap-6 md:grid-cols-2">
           {[
-            ["Can I cancel any time?", "Yes. Cancel from Settings → Billing. You keep Pro until the end of the period you paid for."],
+            ["Can I cancel any time?", "Yes. You keep Pro until the end of the period you paid for."],
             ["What happens after the trial?", "Your account moves to the Free plan. Nothing is deleted and you are never charged unless you upgrade."],
-            ["Do you add tax?", "Sales tax, VAT or GST is calculated at checkout based on your location, where required."],
-            ["Can I switch between monthly and annual?", "Yes. Use Manage billing; Stripe prorates the change."],
+            ["Do you add tax?", "Yes. 18% GST is added to the ₹2,000 monthly price, so you pay ₹2,360 a month. All prices are in Indian Rupees."],
+            ["Is there an annual plan?", "No. Pro is a monthly plan only."],
           ].map(([q, a]) => (
             <div key={q} className="desk-card p-5">
               <h2 className="font-bold">{q}</h2>

@@ -11,6 +11,7 @@ const publicPaths = new Set([
   "/terms",
   "/privacy",
   "/refund",
+  "/support",
   "/forgot-password",
   "/reset-password",
   "/verify-email",

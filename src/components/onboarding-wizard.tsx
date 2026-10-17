@@ -76,7 +76,7 @@ export function OnboardingWizard({ initial, initialStep, resumes }: { initial: P
       {step === 1 && (
         <label className="block text-sm font-semibold">
           Roles you are targeting (comma-separated, up to 5)
-          <input className="mt-1 w-full rounded-xl border p-2" defaultValue={p.targetRoles.join(", ")} onBlur={(e) => set("targetRoles", listFrom(e.target.value).slice(0, 5))} />
+          <input className="mt-1 w-full rounded-xl border p-2" defaultValue={p.targetRoles.join(", ")} onChange={(e) => set("targetRoles", listFrom(e.target.value).slice(0, 5))} />
         </label>
       )}
 
@@ -140,9 +140,9 @@ export function OnboardingWizard({ initial, initialStep, resumes }: { initial: P
       {step === 5 && (
         <div className="space-y-3">
           <label className="block text-sm font-semibold">Key skills (comma-separated)
-            <input className="mt-1 w-full rounded-xl border p-2" defaultValue={p.skills.join(", ")} onBlur={(e) => set("skills", listFrom(e.target.value).slice(0, 40))} /></label>
+            <input className="mt-1 w-full rounded-xl border p-2" defaultValue={p.skills.join(", ")} onChange={(e) => set("skills", listFrom(e.target.value).slice(0, 40))} /></label>
           <label className="block text-sm font-semibold">Preferred industries (comma-separated)
-            <input className="mt-1 w-full rounded-xl border p-2" defaultValue={p.industries.join(", ")} onBlur={(e) => set("industries", listFrom(e.target.value).slice(0, 10))} /></label>
+            <input className="mt-1 w-full rounded-xl border p-2" defaultValue={p.industries.join(", ")} onChange={(e) => set("industries", listFrom(e.target.value).slice(0, 10))} /></label>
         </div>
       )}
 
@@ -155,6 +155,7 @@ export function OnboardingWizard({ initial, initialStep, resumes }: { initial: P
           <dt className="font-semibold">Type</dt><dd>{p.employmentTypes.map((w) => EMPLOYMENT_LABEL[w as keyof typeof EMPLOYMENT_LABEL]).join(", ") || "—"}</dd>
           <dt className="font-semibold">Experience</dt><dd>{p.experienceYears} yrs</dd>
           <dt className="font-semibold">Skills</dt><dd>{p.skills.join(", ") || "—"}</dd>
+          <dt className="font-semibold">Industries</dt><dd data-testid="review-industries">{p.industries.join(", ") || "—"}</dd>
         </dl>
       )}
 

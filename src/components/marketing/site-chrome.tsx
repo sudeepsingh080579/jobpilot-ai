@@ -34,7 +34,7 @@ export function SiteFooter() {
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/refund">Refunds</Link>
-          {process.env.SUPPORT_EMAIL ? <a href={`mailto:${process.env.SUPPORT_EMAIL}`}>Contact</a> : null}
+          <Link href="/support">Support &amp; grievances</Link>
         </nav>
       </div>
     </footer>
