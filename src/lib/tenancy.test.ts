@@ -14,6 +14,7 @@ const REVIEWED: { file: string; pattern: RegExp; why: string }[] = [
   { file: "src/server/upi-store.ts", pattern: /prisma\.(upiPayment\.(findUnique|updateMany|update|delete)|adminAuditLog\.create|adminNotification\.create)/, why: "by payment id just created for the session user, or admin revoke (isAdmin checked in upi-actions.ts)" },
   { file: "src/auth.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ email \} \}\)/, why: "sign-in lookup by email" },
   { file: "src/app/verify-email/page.tsx", pattern: /prisma\.user\.(findUnique|update)/, why: "the signed-in user's own account (session.user.id)" },
+  { file: "src/app/api/start/register/route.ts", pattern: /prisma\.user\.(findUnique|create)\(/, why: "sign-up creates the account itself (same as auth-actions registerAction)" },
   { file: "src/server/auth-actions.ts", pattern: /prisma\.(user|authToken)\./, why: "sign-up, reset and verify operate on the account itself" },
   { file: "src/server/auth-tokens.ts", pattern: /prisma\.authToken\./, why: "hashed single-use token lookup" },
   { file: "src/server/session.ts", pattern: /prisma\.user\.findUnique\(\{ where: \{ id: session\.user\.id \} \}\)/, why: "the session's own user" },

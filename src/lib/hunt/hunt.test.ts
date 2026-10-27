@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dedupKey, detectCountries, locationDecision, needsInputFor, scoreRole, sponsorshipSignal, titleRelevance, type HuntPrefs } from "./rules";
+import { dedupKey, detectCountries, locationDecision, matchesChosenLocation, needsInputFor, scoreRole, sponsorshipSignal, titleRelevance, type HuntPrefs } from "./rules";
 import { tailorResume, validateTailored } from "./tailor";
 import { buildAnswers, hasSalaryAnswer } from "./answers";
 import { parseCompanyCsv, suggestCompanies, VERIFIED_COMPANIES } from "./catalog";
@@ -14,13 +14,39 @@ describe("location rules", () => {
     expect(detectCountries("London; Amsterdam")).toEqual(expect.arrayContaining(["United Kingdom", "Netherlands"]));
     expect(detectCountries("Remote")).toEqual([]);
   });
-  it("accepts allowed countries in any work mode", () => {
-    expect(locationDecision("Dubai, UAE", "Hybrid", "", prefs)).toMatchObject({ ok: true, country: "United Arab Emirates" });
+  it("accepts remote abroad by default, and onsite only in chosen places", () => {
     expect(locationDecision("Remote - Germany", "", "", prefs)).toMatchObject({ ok: true, country: "Germany" });
+    expect(locationDecision("Dubai, UAE", "Hybrid", "", prefs)).toMatchObject({ ok: false });
+    expect(locationDecision("Dubai, UAE", "Hybrid", "", { ...prefs, hybridAbroad: true })).toMatchObject({ ok: true, country: "United Arab Emirates" });
+    expect(locationDecision("Dubai, UAE", "", "", { ...prefs, chosenLocations: ["Dubai"] })).toMatchObject({ ok: true });
+  });
+  it("does not queue Amsterdam or Berlin onsite roles for a Bengaluru-only user", () => {
+    const blr: HuntPrefs = { ...prefs, chosenLocations: ["Bengaluru"] };
+    expect(locationDecision("Amsterdam, Netherlands", "", "", blr)).toMatchObject({ ok: false });
+    expect(locationDecision("Berlin, Germany", "Onsite", "", blr)).toMatchObject({ ok: false });
+    expect(locationDecision("Berlin, Germany", "Hybrid", "", blr)).toMatchObject({ ok: false });
+    expect(locationDecision("Bangalore, Karnataka, India", "", "", blr)).toMatchObject({ ok: true, country: "India" });
+    expect(locationDecision("Mumbai, India", "", "", blr)).toMatchObject({ ok: false });
+    expect(locationDecision("Amsterdam; Bengaluru", "", "", blr)).toMatchObject({ ok: true, country: "India" });
+    expect(locationDecision("Remote - Netherlands", "Remote", "", blr)).toMatchObject({ ok: true });
+    expect(locationDecision("Remote - Netherlands", "Remote", "", { ...blr, remoteAbroad: false })).toMatchObject({ ok: false });
+    expect(locationDecision("Remote, India", "Remote", "", blr)).toMatchObject({ ok: true });
+  });
+  it("matches country-level and alias choices", () => {
+    expect(matchesChosenLocation("Gurgaon, Haryana", ["Gurugram"])).toBe(true);
+    expect(matchesChosenLocation("Noida", ["Delhi NCR"])).toBe(true);
+    expect(matchesChosenLocation("Berlin", ["Germany"])).toBe(true);
+    expect(matchesChosenLocation("Dubai", ["UAE"])).toBe(true);
+    expect(matchesChosenLocation("Pune", ["Bengaluru", "Remote"])).toBe(false);
+  });
+  it("with no chosen locations, India anywhere and remote only", () => {
+    expect(locationDecision("Hyderabad, India", "", "", prefs)).toMatchObject({ ok: true });
+    expect(locationDecision("Amsterdam", "", "", prefs)).toMatchObject({ ok: false });
   });
   it("skips US roles unless sponsorship is mentioned", () => {
     expect(locationDecision("New York, NY", "", "Great team.", prefs)).toMatchObject({ ok: false });
-    expect(locationDecision("New York, NY", "", "Visa sponsorship is available for this role.", prefs)).toMatchObject({ ok: true, country: "United States" });
+    expect(locationDecision("New York, NY", "", "Visa sponsorship is available for this role.", { ...prefs, chosenLocations: ["New York"] })).toMatchObject({ ok: true, country: "United States" });
+    expect(locationDecision("New York, NY", "", "Visa sponsorship is available for this role.", prefs)).toMatchObject({ ok: false });
   });
   it("skips other countries and unspecified remote", () => {
     expect(locationDecision("Toronto, Canada", "", "", prefs).ok).toBe(false);
@@ -95,10 +121,10 @@ describe("answers and catalog", () => {
     expect(VERIFIED_COMPANIES.length).toBeGreaterThanOrEqual(80);
     const keys = VERIFIED_COMPANIES.map((c) => `${c.ats}:${c.token}`);
     expect(new Set(keys).size).toBe(keys.length);
-    for (const c of VERIFIED_COMPANIES) expect(["greenhouse", "lever", "ashby", "smartrecruiters"]).toContain(c.ats);
+    for (const c of VERIFIED_COMPANIES) expect(["greenhouse", "lever", "ashby", "smartrecruiters", "workday"]).toContain(c.ats);
   });
   it("parses CSV and suggests unlisted companies", () => {
-    const r = parseCompanyCsv("name,ats,board_token,industry\nStripe,greenhouse,stripe,Fintech\nBad,workday,x");
+    const r = parseCompanyCsv("name,ats,board_token,industry\nStripe,greenhouse,stripe,Fintech\nBad,taleo,x");
     expect(r.rows).toHaveLength(1);
     expect(r.errors).toHaveLength(1);
     expect(suggestCompanies([{ ats: "greenhouse", boardToken: "stripe" }], ["fintech"]).some((c) => c.token === "stripe")).toBe(false);

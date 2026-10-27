@@ -2,9 +2,9 @@
 export const brand = {
   name: "JobPilot AI",
   shortName: "JobPilot",
-  tagline: "One clear next step for your job search.",
+  tagline: "The AI job-search service for job seekers.",
   description:
-    "AI job-search assistant for professionals worldwide. Target roles, tailor resumes, track applications, draft outreach, and practise interviews in one installable app.",
+    "AI job-search service for job seekers. Upload your resume, get an ATS-compliant version built from your own facts, and find fresh jobs matching it on employer career pages, every day.",
   demoEmail: "demo@jobpilot.local",
   demoPassword: "pilot-demo",
 } as const;

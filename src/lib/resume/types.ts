@@ -17,6 +17,10 @@ export type ResumeContent = {
   }[];
   education: { school: string; credential: string; year: string }[];
   certifications: string[];
+  /** Optional sections preserved from the upload. */
+  projects?: { name: string; bullets: string[] }[];
+  /** Awards, languages, achievements and other short lines kept verbatim. */
+  additional?: { heading: string; lines: string[] }[];
 };
 
 export const emptyResume = (): ResumeContent => ({
@@ -50,6 +54,8 @@ export function resumeToText(content: ResumeContent) {
     roles,
     content.education.map((item) => `${item.credential}, ${item.school}, ${item.year}`).join("\n"),
     content.certifications.join(", "),
+    (content.projects ?? []).map((p) => [p.name, ...p.bullets].join("\n")).join("\n"),
+    (content.additional ?? []).map((a) => [a.heading, ...a.lines].join("\n")).join("\n"),
   ]
     .filter(Boolean)
     .join("\n");

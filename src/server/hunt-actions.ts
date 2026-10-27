@@ -6,6 +6,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { parseCompanyCsv, VERIFIED_COMPANIES } from "@/lib/hunt/catalog";
 import { verifyBoard, type Ats } from "@/lib/hunt/ats";
 import { actionUser } from "@/server/session";
+import { validTimeZone } from "@/lib/hunt/schedule";
 import { getHuntSettings, runHunt } from "@/server/hunt-store";
 
 const done = () => revalidatePath("/hunt");
@@ -35,6 +36,11 @@ export async function saveHuntSettingsAction(form: FormData) {
   await getHuntSettings(user.id);
   const countries = String(form.get("allowedCountries") ?? "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 20);
   const threshold = Math.min(100, Math.max(0, Number(form.get("threshold")) || 70));
+  const tzRaw = String(form.get("timezone") ?? "Asia/Kolkata").trim();
+  const timezone = validTimeZone(tzRaw) ? tzRaw : "Asia/Kolkata";
+  const [hh, mm] = String(form.get("autoRunTime") ?? "08:00").split(":").map((n) => Number(n));
+  const hour = Number.isInteger(hh) && hh >= 0 && hh <= 23 ? hh : 8;
+  const minute = Number.isInteger(mm) && mm >= 0 && mm <= 59 ? mm : 0;
   await prisma.huntSettings.update({
     where: { userId: user.id },
     data: {
@@ -43,10 +49,31 @@ export async function saveHuntSettingsAction(form: FormData) {
       needsSponsorship: form.get("needsSponsorship") === "on",
       allowUsWithSponsorship: form.get("allowUsWithSponsorship") === "on",
       homeCountry: String(form.get("homeCountry") ?? "India").trim().slice(0, 60) || "India",
-      companiesPerRun: Math.min(60, Math.max(1, Number(form.get("companiesPerRun")) || 25)),
+      companiesPerRun: Math.min(300, Math.max(1, Number(form.get("companiesPerRun")) || 300)),
       autoRun: form.get("autoRun") === "on",
+      autoRunHour: hour,
+      autoRunMinute: minute,
+      timezone,
+      freshnessDays: Math.min(30, Math.max(1, Math.round(Number(form.get("freshnessDays")) || 3))),
+      includeUnknownDate: form.get("includeUnknownDate") === "on",
+      remoteAbroad: form.get("remoteAbroad") === "on",
+      hybridAbroad: form.get("hybridAbroad") === "on",
     },
   });
+  const roles = String(form.get("targetRoles") ?? "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 8);
+  const locations = String(form.get("locations") ?? "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
+  await prisma.jobPreferences.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, targetRoles: roles, locations, remoteIndia: form.get("remoteHome") === "on" },
+    update: { targetRoles: roles, locations, remoteIndia: form.get("remoteHome") === "on" },
+  });
+  done();
+}
+
+export async function markNoticesReadAction() {
+  const user = await actionUser();
+  if (!user) return;
+  await prisma.userNotice.updateMany({ where: { userId: user.id, readAt: null }, data: { readAt: new Date() } });
   done();
 }
 

@@ -24,8 +24,8 @@ export function parseCompanyCsv(csv: string) {
     const cells = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
     if (i === 0 && /^name$/i.test(cells[0])) return;
     const [name, ats, token, industry = ""] = cells;
-    if (!name || !token || !["greenhouse", "lever", "ashby", "smartrecruiters"].includes((ats ?? "").toLowerCase())) {
-      errors.push(`Line ${i + 1}: expected name,ats(greenhouse|lever|ashby|smartrecruiters),board_token`);
+    if (!name || !token || !["greenhouse", "lever", "ashby", "smartrecruiters", "workday"].includes((ats ?? "").toLowerCase())) {
+      errors.push(`Line ${i + 1}: expected name,ats(greenhouse|lever|ashby|smartrecruiters|workday),board_token`);
       return;
     }
     rows.push({ name: name.slice(0, 120), ats: ats.toLowerCase() as Ats, token: token.slice(0, 120), industry: industry.slice(0, 80) });

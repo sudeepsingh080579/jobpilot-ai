@@ -63,6 +63,8 @@ model User {
   huntSettings          HuntSettings?
   huntRuns              HuntRun[]
   huntJobs              HuntJob[]
+  resumeVersions        ResumeVersion[]
+  notices               UserNotice[]
   savedAnswers          SavedAnswer[]
   onboardingStep        Int                  @default(0)
   onboardingCompletedAt DateTime?
@@ -271,8 +273,29 @@ model Resume {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   coverLetters CoverLetter[]
+  versions     ResumeVersion[]
 
   @@index([userId])
+}
+
+/// ATS-enhanced versions of an uploaded resume. The original Resume row is never modified.
+model ResumeVersion {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeId   String
+  resume     Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  version    Int
+  targetRole String   @default("")
+  content    String   @default("{}")
+  atsBefore  Int      @default(0)
+  atsAfter   Int      @default(0)
+  /// JSON: {changes:[{kind,section,before,after}], before:{...}, after:{...}, keywords:{matched,missing}}
+  detail     String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@unique([resumeId, version])
+  @@index([userId, createdAt])
 }
 
 model CoverLetter {
@@ -583,8 +606,19 @@ model HuntSettings {
   allowUsWithSponsorship Boolean  @default(true)
   needsSponsorship       Boolean  @default(false)
   homeCountry            String   @default("India")
-  companiesPerRun        Int      @default(25)
+  companiesPerRun        Int      @default(300)
   autoRun                Boolean  @default(false)
+  /// Local time of day for the daily run, in `timezone`.
+  autoRunHour            Int      @default(8)
+  autoRunMinute          Int      @default(0)
+  timezone               String   @default("Asia/Kolkata")
+  lastAutoRunAt          DateTime?
+  /// Only postings published within this many days are considered.
+  freshnessDays          Int      @default(3)
+  /// Postings with no reliable date: excluded unless true.
+  includeUnknownDate     Boolean  @default(false)
+  remoteAbroad           Boolean  @default(true)
+  hybridAbroad           Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }
@@ -601,6 +635,9 @@ model HuntRun {
   fresh      Int       @default(0)
   queued     Int       @default(0)
   skipped    Int       @default(0)
+  stale      Int       @default(0)
+  undated    Int       @default(0)
+  locationSkipped Int  @default(0)
   errors     String    @default("[]")
   startedAt  DateTime  @default(now())
   finishedAt DateTime?
@@ -628,6 +665,12 @@ model HuntJob {
   decision    String
   skipReason  String    @default("")
   tailored    String    @default("")
+  /// JSON ResumeContent of the guardrailed per-role tailored resume (PDF/DOCX are rendered from it).
+  tailoredContent String @default("{}")
+  postedAt    DateTime?
+  /// exact | approx | unknown
+  dateKind    String    @default("unknown")
+  source      String    @default("ats")
   answers     String    @default("[]")
   needsInput  String[]
   appliedAt   DateTime?
@@ -647,4 +690,19 @@ model SavedAnswer {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+/// In-app notifications (always on); email is sent in addition when a mailer is configured.
+model UserNotice {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String    @default("hunt")
+  title     String
+  body      String    @default("")
+  href      String    @default("")
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }

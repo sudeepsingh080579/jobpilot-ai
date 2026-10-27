@@ -40,29 +40,106 @@ export type HuntPrefs = {
   allowUsWithSponsorship: boolean;
   needsSponsorship: boolean;
   homeCountry: string;
+  /** Cities or countries the user chose (JobPreferences.locations). Empty = the home country, anywhere. */
+  chosenLocations?: string[];
+  /** Remote roles based in another allowed country (default true). */
+  remoteAbroad?: boolean;
+  /** Hybrid roles based in another allowed country (default false). */
+  hybridAbroad?: boolean;
 };
 
 export type LocationDecision = { ok: true; country: string; note: string } | { ok: false; reason: string };
 
+/** City alias groups: a chosen city matches any alias in its group. */
+const CITY_GROUPS: string[][] = [
+  ["bengaluru", "bangalore"],
+  ["gurugram", "gurgaon"],
+  ["delhi ncr", "ncr", "delhi", "new delhi", "noida", "gurugram", "gurgaon", "ghaziabad", "faridabad", "greater noida"],
+  ["mumbai", "bombay", "navi mumbai", "thane"],
+  ["chennai", "madras"],
+  ["kolkata", "calcutta"],
+  ["pune", "pimpri"],
+  ["kochi", "cochin"],
+  ["thiruvananthapuram", "trivandrum"],
+  ["munich", "münchen"],
+  ["cologne", "köln"],
+];
+const COUNTRY_ALIASES: Record<string, string> = { uae: "United Arab Emirates", uk: "United Kingdom", "great britain": "United Kingdom", england: "United Kingdom", holland: "Netherlands", deutschland: "Germany", usa: "United States", us: "United States" };
+
+function chosenCountry(item: string): string | null {
+  const l = item.trim().toLowerCase();
+  if (COUNTRY_ALIASES[l]) return COUNTRY_ALIASES[l];
+  return Object.keys(COUNTRY_TERMS).find((c) => c.toLowerCase() === l && c !== "Other") ?? null;
+}
+
+/** True when the posting's location text names a city or country the user chose. */
+export function matchesChosenLocation(location: string, chosen: string[]): boolean {
+  const l = location.toLowerCase();
+  for (const raw of chosen) {
+    const item = raw.trim().toLowerCase();
+    if (!item || item === "remote") continue;
+    const country = chosenCountry(item);
+    if (country) {
+      if (detectCountries(location).includes(country)) return true;
+      continue;
+    }
+    const group = CITY_GROUPS.find((g) => g.includes(item)) ?? [item];
+    if (group.some((t) => hasTerm(l, t))) return true;
+  }
+  return false;
+}
+
+/**
+ * Location rule.
+ * - Onsite (and hybrid in the home country): only in a city or country the user chose.
+ *   With no choices, the home country anywhere.
+ * - Remote in the home country: allowed. Remote in another allowed country: `remoteAbroad` (default on).
+ * - Hybrid in another allowed country: `hybridAbroad` (default off), or when the user chose that place.
+ * - Countries outside the allowed list are skipped; the US only with stated visa sponsorship.
+ */
 export function locationDecision(location: string, workplace: string, description: string, prefs: HuntPrefs): LocationDecision {
   const countries = detectCountries(location);
   const allowed = countries.filter((c) => prefs.allowedCountries.includes(c));
   const sponsor = sponsorshipSignal(description);
-  const remote = /remote/i.test(`${location} ${workplace}`);
-  let country = allowed[0] ?? "";
+  const blob = `${location} ${workplace}`;
+  const mode: "remote" | "hybrid" | "onsite" = /hybrid/i.test(blob) ? "hybrid" : /remote/i.test(blob) ? "remote" : "onsite";
+  const chosen = (prefs.chosenLocations ?? []).map((c) => c.trim()).filter(Boolean);
+  const home = prefs.homeCountry;
+  let country = allowed.includes(home) ? home : allowed[0] ?? "";
   if (!country) {
     if (countries.includes("United States")) {
-      if (prefs.allowUsWithSponsorship && sponsor === "yes") country = "United States";
-      else return { ok: false, reason: "US role without stated visa sponsorship" };
+      if (!(prefs.allowUsWithSponsorship && sponsor === "yes")) return { ok: false, reason: "US role without stated visa sponsorship" };
+      country = "United States";
     } else if (countries.length) return { ok: false, reason: `Location outside allowed countries (${location.slice(0, 80)})` };
-    else if (remote) return { ok: false, reason: "Remote, but the posting does not say which countries are eligible" };
+    else if (mode === "remote") return { ok: false, reason: "Remote, but the posting does not say which countries are eligible" };
     else return { ok: false, reason: "Location not stated" };
   }
-  if (prefs.needsSponsorship && country !== prefs.homeCountry && sponsor === "no") {
-    return { ok: false, reason: `Posting says no visa sponsorship (needed outside ${prefs.homeCountry})` };
+  if (prefs.needsSponsorship && country !== home && sponsor === "no") {
+    return { ok: false, reason: `Posting says no visa sponsorship (needed outside ${home})` };
   }
-  const mode = /hybrid/i.test(`${location} ${workplace}`) ? "hybrid" : remote ? "remote" : "onsite";
-  return { ok: true, country, note: `${country} · ${mode}${sponsor === "yes" ? " · sponsorship mentioned" : ""}` };
+  const abroad = country !== home;
+  const picked = chosen.length ? matchesChosenLocation(location, chosen) : false;
+  const summary = chosen.length ? chosen.join(", ") : home;
+  const fine = (why: string) => ({ ok: true as const, country, note: `${country} · ${mode}${sponsor === "yes" ? " · sponsorship mentioned" : ""}${why ? ` · ${why}` : ""}` });
+
+  if (mode === "remote") {
+    if (!abroad) return fine("");
+    if (prefs.remoteAbroad ?? true) return fine("remote abroad allowed");
+    if (picked) return fine("in your locations");
+    return { ok: false, reason: `Remote in ${country}; remote-abroad is off in your settings` };
+  }
+  if (mode === "hybrid" && abroad) {
+    if (prefs.hybridAbroad) return fine("hybrid abroad allowed");
+    if (picked) return fine("in your locations");
+    return { ok: false, reason: `Hybrid in ${country}; hybrid-abroad is off in your settings` };
+  }
+  // Onsite anywhere, or hybrid at home: needs a chosen city/country.
+  if (!chosen.length) {
+    if (!abroad) return fine("home country");
+    return { ok: false, reason: `Onsite in ${location.slice(0, 60)}; ${country} is not in your locations` };
+  }
+  if (picked) return fine("in your locations");
+  return { ok: false, reason: `${mode === "hybrid" ? "Hybrid" : "Onsite"} in ${location.slice(0, 60)}; not in your locations (${summary})` };
 }
 
 const STOP = new Set(["senior", "sr", "junior", "jr", "lead", "staff", "principal", "head", "of", "and", "the", "a", "ii", "iii", "iv", "i", "&", "-", "/", "manager", "engineer", "specialist", "associate", "intern"]);

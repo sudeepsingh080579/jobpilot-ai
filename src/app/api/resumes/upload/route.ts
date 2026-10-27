@@ -1,9 +1,8 @@
-import mammoth from "mammoth";
-import { extractText, getDocumentProxy } from "unpdf";
 import { auth } from "@/auth";
 import { LIMITS, rateLimit } from "@/lib/rate-limit";
 import { stringifyJson } from "@/lib/json";
 import { prisma } from "@/lib/prisma";
+import { extractResumeText } from "@/lib/resume/extract";
 import { parseResumeText } from "@/lib/resume/parse";
 import { scoreResume } from "@/lib/scoring/resume-score";
 import { MAX_UPLOAD_BYTES, storeResumeFile } from "@/lib/uploads";
@@ -21,24 +20,9 @@ export async function POST(request: Request) {
   if (!(file instanceof File)) return Response.json({ error: "Choose a PDF, DOCX, or TXT file." }, { status: 400 });
   if (file.size > MAX_UPLOAD_BYTES) return Response.json({ error: "Keep the file under 4 MB." }, { status: 400 });
   const buffer = Buffer.from(await file.arrayBuffer());
-  const name = file.name.toLowerCase();
-  let text = "";
-  try {
-    if (name.endsWith(".docx")) {
-      const result = await mammoth.extractRawText({ buffer });
-      text = result.value;
-    } else if (name.endsWith(".pdf")) {
-      const pdf = await getDocumentProxy(new Uint8Array(buffer));
-      const extracted = await extractText(pdf, { mergePages: true });
-      text = Array.isArray(extracted.text) ? extracted.text.join("\n") : String(extracted.text ?? "");
-    } else if (name.endsWith(".txt")) {
-      text = buffer.toString("utf8");
-    } else {
-      return Response.json({ error: "Upload a PDF, DOCX, or TXT file." }, { status: 400 });
-    }
-  } catch {
-    return Response.json({ error: "Could not read that file. Paste the text instead." }, { status: 422 });
-  }
+  const extracted = await extractResumeText(file.name, buffer);
+  if (!extracted.ok) return Response.json({ error: extracted.error }, { status: extracted.status });
+  const text = extracted.text;
   if (text.trim().length < 40) return Response.json({ error: "Not enough text in that file. Paste the resume instead." }, { status: 422 });
   const content = parseResumeText(text);
   if (!content.name) content.name = session.user.name ?? "";
